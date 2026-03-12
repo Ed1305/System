@@ -87,7 +87,7 @@
         .login-card-exact .btn-login:hover {
             opacity: 0.9;
         }
-        /* ---------- DASHBOARD (NEW BACKGROUND) ---------- */
+        /* ---------- DASHBOARD BACKGROUND ---------- */
         .dashboard-with-bg {
             background-image: url('https://i.ibb.co/4g0SvNMt/logo1.png');
             background-size: cover;
@@ -150,6 +150,9 @@
             margin-bottom: 1.25rem;
             background: #2a2a3c;
         }
+        .app-logo-bg.render {
+            background: linear-gradient(145deg, #1e3a5f, #0b1e33);
+        }
         .demographics-logo-bg {
             width: 64px;
             height: 64px;
@@ -209,29 +212,46 @@
             opacity: 0.9;
             box-shadow: 0 8px 12px -6px #d91b25;
         }
+        /* Platform badges */
+        .platform-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            border: 1px solid;
+        }
+        .badge-vercel {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e5e5e5;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        .badge-render {
+            background: rgba(0, 180, 255, 0.2);
+            color: #7dd3fc;
+            border-color: rgba(0, 180, 255, 0.3);
+        }
     </style>
 </head>
 <body>
 
-    <!-- ========== LOGIN PAGE (card on left) ========== -->
+    <!-- ========== LOGIN PAGE ========== -->
     <div id="loginContainer" class="login-page">
         <div class="login-card-exact">
             <h1>Welcome</h1>
             <div class="subtitle">Please enter your name</div>
-
             <form id="loginForm">
                 <div class="input-label">YOUR NAME</div>
-                <input type="text" id="usernameInput" placeholder=" " required>
+                <input type="text" id="usernameInput" placeholder="Eden" required>
                 <button type="submit" class="btn-login">
                     <i class="fas fa-lock"></i> Access
                 </button>
             </form>
-
             <div id="loginError" class="text-red-500 text-sm mt-4 hidden"></div>
         </div>
     </div>
 
-    <!-- ========== MAIN DASHBOARD (with NEW background) ========== -->
+    <!-- ========== MAIN DASHBOARD ========== -->
     <div id="dashboardContainer" class="hidden w-full p-6 overflow-y-auto min-h-screen dashboard-with-bg">
         <div class="content-overlay">
             <!-- Top bar -->
@@ -259,20 +279,42 @@
                 <!-- JS will fill -->
             </div>
 
-            <!-- Admin Panel -->
+            <!-- Admin Panel (with Render API key input) -->
             <div id="adminPanel" class="hidden mt-8">
                 <div class="bg-black/50 backdrop-blur-md rounded-2xl p-5 border border-purple-500/20">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-lg font-semibold flex items-center gap-2 text-white"><i class="fas fa-crown text-purple-400"></i> Admin dashboard</h2>
                         <button onclick="logoutAdmin()" class="text-sm bg-gray-700/80 hover:bg-gray-600 px-4 py-2 rounded-full transition flex items-center gap-2 text-white"><i class="fas fa-sign-out-alt"></i> Logout</button>
                     </div>
+
+                    <!-- Render API Key input -->
+                    <div class="mb-4 p-4 bg-gray-800/60 rounded-xl border border-gray-700">
+                        <h3 class="font-medium mb-2 flex items-center gap-2 text-gray-300"><i class="fas fa-key text-purple-400"></i> Render API Key</h3>
+                        <div class="flex gap-2">
+                            <input type="password" id="renderApiKey" placeholder="Enter your Render API key" 
+                                   class="flex-1 p-2 rounded-lg bg-gray-700/80 border border-gray-600 text-white placeholder:text-gray-400">
+                            <button onclick="saveRenderApiKey()" class="gradient-btn px-4 py-2">Save</button>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Stored securely in database and used for auto-discovery.</p>
+                    </div>
+
                     <div class="grid md:grid-cols-2 gap-4">
-                        <!-- Add app -->
+                        <!-- Add app (platform selector + URL) -->
                         <div class="bg-gray-800/60 backdrop-blur-sm rounded-xl p-4 border border-gray-700">
-                            <h3 class="font-medium mb-3 flex items-center gap-2 text-gray-300"><i class="fas fa-plus-circle text-purple-400"></i> Add from Vercel</h3>
-                            <input type="url" id="vercelUrl" placeholder="https://your-app.vercel.app" 
+                            <h3 class="font-medium mb-3 flex items-center gap-2 text-gray-300"><i class="fas fa-plus-circle text-purple-400"></i> Add from Vercel / Render</h3>
+                            
+                            <div class="mb-3">
+                                <label class="block text-xs text-gray-400 mb-1">Platform</label>
+                                <select id="platformSelect" class="w-full p-2 rounded-lg bg-gray-700/80 border border-gray-600 text-white">
+                                    <option value="vercel">Vercel</option>
+                                    <option value="render">Render</option>
+                                </select>
+                            </div>
+
+                            <input type="url" id="appUrl" placeholder="https://your-app.vercel.app or https://your-app.onrender.com" 
                                 class="w-full p-2 rounded-lg bg-gray-700/80 border border-gray-600 text-white placeholder:text-gray-400 mb-2 focus:outline-none focus:ring-1 focus:ring-purple-500">
-                            <button onclick="simulateFetch()" class="gradient-btn w-full justify-center py-2">
+                            
+                            <button onclick="addAppFromPlatform()" class="gradient-btn w-full justify-center py-2">
                                 <i class="fas fa-magic"></i> Fetch & Add
                             </button>
                         </div>
@@ -303,7 +345,7 @@
     </div>
 
     <script>
-        // ========== SUPABASE CONFIG (YOUR PROJECT) ==========
+        // ========== SUPABASE CONFIG ==========
         const SUPABASE_URL = 'https://fvicrbnpxrjlurcubwwo.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2aWNyYm5weHJqbHVyY3Vid3dvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0ODMyMDksImV4cCI6MjA4NzA1OTIwOX0.5Vb2c1qUjDPlMSKuh_7_J0gUEpm3O36EhuuHagc4x_I';
         const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -434,6 +476,7 @@
                 closeAdminModal();
                 subscribeToActivities();
                 fetchActivities();
+                loadRenderApiKey(); // Load saved Render API key if any
             } else {
                 document.getElementById('adminError').classList.remove('hidden');
             }
@@ -447,6 +490,99 @@
             if (activitiesChannel) {
                 sbClient.removeChannel(activitiesChannel);
                 activitiesChannel = null;
+            }
+        };
+
+        // ========== RENDER API KEY FUNCTIONS ==========
+        async function saveRenderApiKey() {
+            if (!adminAuthenticated) {
+                alert('You must be logged in as admin.');
+                return;
+            }
+            const key = document.getElementById('renderApiKey').value.trim();
+            if (!key) return;
+
+            const { error } = await sbClient
+                .from('settings')
+                .update({ render_api_key: key, updated_at: new Date().toISOString() })
+                .eq('id', 1);
+            if (error) {
+                alert('Error saving key: ' + error.message);
+            } else {
+                alert('Render API key saved!');
+            }
+        }
+
+        async function loadRenderApiKey() {
+            const { data, error } = await sbClient
+                .from('settings')
+                .select('render_api_key')
+                .eq('id', 1)
+                .single();
+            if (!error && data && data.render_api_key) {
+                document.getElementById('renderApiKey').value = data.render_api_key;
+            }
+        }
+
+        // ========== ADD APP FROM PLATFORM ==========
+        window.addAppFromPlatform = async function() {
+            if (!adminAuthenticated) {
+                alert('You must be logged in as admin first.');
+                return;
+            }
+            const platform = document.getElementById('platformSelect').value;
+            const url = document.getElementById('appUrl').value.trim();
+            if (!url) {
+                alert('Please enter a URL');
+                return;
+            }
+
+            let name = '';
+            let appData = {};
+
+            if (platform === 'vercel') {
+                // Simulate Vercel name extraction
+                let hostname = url.replace('https://', '').replace('http://', '').split('/')[0];
+                name = hostname.split('.')[0];
+                name = name.charAt(0).toUpperCase() + name.slice(1);
+                appData = { name, url, platform, addedAt: new Date().toISOString() };
+                // Insert directly
+                const { error } = await sbClient.from('apps').insert([appData]);
+                if (error) {
+                    alert('Error adding app: ' + error.message);
+                    return;
+                }
+                addActivity('App added', `"${name}" (${platform}) from ${url}`);
+                document.getElementById('appUrl').value = '';
+            } else {
+                // Render: call backend endpoint with API key
+                const apiKey = document.getElementById('renderApiKey').value.trim();
+                if (!apiKey) {
+                    alert('Please save your Render API key first.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/fetch-render-app', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url, apiKey })
+                    });
+                    if (!response.ok) {
+                        const err = await response.json();
+                        throw new Error(err.error || 'Failed to fetch from Render');
+                    }
+                    const data = await response.json();
+                    name = data.name;
+                    appData = { name, url, platform, addedAt: new Date().toISOString() };
+
+                    const { error } = await sbClient.from('apps').insert([appData]);
+                    if (error) throw error;
+                    addActivity('App added', `"${name}" (${platform}) from ${url}`);
+                    document.getElementById('appUrl').value = '';
+                } catch (err) {
+                    alert('Error adding Render app: ' + err.message);
+                }
             }
         };
 
@@ -473,9 +609,15 @@
             grid.innerHTML = apps.map(app => {
                 const firstLetter = app.name.charAt(0).toUpperCase();
                 const bgColor = stringToColor(app.name);
+                const platform = app.platform || 'vercel';
+                const badgeClass = platform === 'render' ? 'badge-render' : 'badge-vercel';
+                const platformIcon = platform === 'vercel' ? '▲' : '☁️';
+                const logoExtraClass = platform === 'render' ? 'render' : '';
+
                 if (app.name === "Demographics") {
                     return `
-                        <div class="app-card-bg flex flex-col items-center text-center">
+                        <div class="app-card-bg flex flex-col items-center text-center relative">
+                            <div class="absolute top-2 right-2 platform-badge ${badgeClass}">${platformIcon} ${platform}</div>
                             <div class="demographics-logo-bg">
                                 <span style="font-weight: bold; font-size: 1.5em;">🌐👥 Demographics</span>
                             </div>
@@ -487,8 +629,9 @@
                     `;
                 } else {
                     return `
-                        <div class="app-card-bg flex flex-col items-center text-center">
-                            <div class="app-logo-bg" style="background: ${bgColor};">${firstLetter}</div>
+                        <div class="app-card-bg flex flex-col items-center text-center relative">
+                            <div class="absolute top-2 right-2 platform-badge ${badgeClass}">${platformIcon} ${platform}</div>
+                            <div class="app-logo-bg ${logoExtraClass}" style="background: ${bgColor};">${firstLetter}</div>
                             <h3 class="font-medium text-white text-base mb-4 truncate w-full">${escapeHtml(app.name)}</h3>
                             <a href="${escapeHtml(app.url)}" target="_blank" class="launch-btn-bg w-full justify-center">
                                 <i class="fas fa-rocket"></i> Launch app
@@ -538,32 +681,6 @@
             ]);
             if (error) throw error;
         }
-
-        // ========== SIMULATED FETCH ==========
-        window.simulateFetch = async function() {
-            if (!adminAuthenticated) {
-                alert('You must be logged in as admin first.');
-                return;
-            }
-            const url = document.getElementById('vercelUrl').value.trim();
-            if (!url) {
-                alert('Please enter a Vercel URL');
-                return;
-            }
-            let hostname = url.replace('https://', '').replace('http://', '').split('/')[0];
-            let name = hostname.split('.')[0];
-            name = name.charAt(0).toUpperCase() + name.slice(1);
-
-            const { error } = await sbClient.from('apps').insert([
-                { name, url, addedAt: new Date().toISOString() }
-            ]);
-            if (error) {
-                alert('Error adding app: ' + error.message);
-            } else {
-                addActivity('App added', `"${name}" from ${url}`);
-                document.getElementById('vercelUrl').value = '';
-            }
-        };
 
         // ========== CLOSE MODAL ON OUTSIDE CLICK ==========
         window.onclick = function(event) {
