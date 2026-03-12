@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alpha Konnect · Internal Hub</title>
+    <!-- Tailwind + fonts + icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
+        /* ---------- LOGIN PAGE (background image, card on left) ---------- */
+        .login-page {
+            min-height: 100vh;
+            width: 100%;
+            background-image: url('https://i.ibb.co/jkctLPLq/logo.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding-left: 5%;
+        }
+        .login-card-exact {
+            background: #1e1e2f;
+            border-radius: 32px;
+            box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 440px;
+            padding: 2.5rem;
+            color: #e0e0e0;
+        }
+        .login-card-exact h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            line-height: 1.2;
+            margin-bottom: 0.5rem;
+        }
+        .login-card-exact .subtitle {
+            font-size: 1rem;
+            color: #a0a0c0;
+            margin-bottom: 2rem;
+        }
+        .login-card-exact .input-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #b0b0c0;
+            margin-bottom: 0.5rem;
+        }
+        .login-card-exact input {
+            width: 100%;
+            background: #2a2a3c;
+            border: 1px solid #3a3a4c;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            color: white;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            outline: none;
+        }
+        .login-card-exact input:focus {
+            border-color: #8b5cf6;
+        }
+        .login-card-exact .btn-login {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            color: white;
+            font-weight: 600;
+            border-radius: 9999px;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .login-card-exact .btn-login:hover {
+            opacity: 0.9;
+        }
+        /* ---------- DASHBOARD (NEW BACKGROUND) ---------- */
+        .dashboard-with-bg {
+            background-image: url('https://i.ibb.co/4g0SvNMt/logo1.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+        .content-overlay {
+            background: rgba(18, 18, 28, 0.7);
+            backdrop-filter: blur(4px);
+            border-radius: 24px;
+            padding: 1.5rem;
+            color: #e0e0e0;
+        }
+        .app-card-bg {
+            background: rgba(30, 30, 47, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 24px;
+            transition: all 0.2s ease;
+            padding: 1.75rem 1.5rem;
+            box-shadow: 0 10px 20px -8px rgba(0,0,0,0.5);
+        }
+        .app-card-bg:hover {
+            border-color: #8b5cf6;
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -8px rgba(139,92,246,0.5);
+            background: rgba(40, 40, 60, 0.9);
+        }
+        .launch-btn-bg {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            color: white;
+            font-weight: 600;
+            border-radius: 9999px;
+            padding: 0.625rem 1.25rem;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 8px -4px rgba(0,0,0,0.3);
+        }
+        .launch-btn-bg:hover {
+            opacity: 0.9;
+            box-shadow: 0 8px 12px -6px rgba(139,92,246,0.4);
+        }
+        .app-logo-bg {
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: white;
+            box-shadow: 0 8px 16px -6px rgba(0,0,0,0.5);
+            margin-bottom: 1.25rem;
+            background: #2a2a3c;
+        }
+        .demographics-logo-bg {
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+            background: transparent;
+            box-shadow: none;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .lock-icon {
+            color: #c0c0d0;
+            transition: all 0.2s;
+        }
+        .lock-icon:hover {
+            color: white;
+            transform: scale(1.1);
+        }
+        .user-logout-btn-bg {
+            background: rgba(42, 42, 60, 0.8);
+            color: #c0c0d0;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 9999px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+        }
+        .user-logout-btn-bg:hover {
+            background: rgba(58, 58, 76, 0.9);
+            color: white;
+        }
+        .gradient-btn {
+            background: linear-gradient(135deg, #eb4747, #f44f4f);
+            color: #1f2937;
+            font-weight: 600;
+            border-radius: 9999px;
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 8px -4px rgba(0,0,0,0.1);
+        }
+        .gradient-btn:hover { 
+            opacity: 0.9;
+            box-shadow: 0 8px 12px -6px #d91b25;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========== LOGIN PAGE (card on left) ========== -->
+    <div id="loginContainer" class="login-page">
+        <div class="login-card-exact">
+            <h1>Welcome</h1>
+            <div class="subtitle">Please enter your name</div>
+
+            <form id="loginForm">
+                <div class="input-label">YOUR NAME</div>
+                <input type="text" id="usernameInput" placeholder=" " required>
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-lock"></i> Access
+                </button>
+            </form>
+
+            <div id="loginError" class="text-red-500 text-sm mt-4 hidden"></div>
+        </div>
+    </div>
+
+    <!-- ========== MAIN DASHBOARD (with NEW background) ========== -->
+    <div id="dashboardContainer" class="hidden w-full p-6 overflow-y-auto min-h-screen dashboard-with-bg">
+        <div class="content-overlay">
+            <!-- Top bar -->
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-white flex items-center gap-2">
+                        <i class="fas fa-cubes text-purple-400"></i> Alpha Konnect
+                    </h1>
+                    <p class="text-sm text-gray-300 mt-1">internal Hub</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span id="welcomeUser" class="text-sm font-medium text-gray-300"></span>
+                    <button onclick="logoutUser()" class="user-logout-btn-bg" title="Logout">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                    <button id="lockBtn" onclick="showAdminModal()" class="relative group">
+                        <i class="fas fa-lock text-2xl lock-icon"></i>
+                        <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 text-xs bg-gray-800 text-purple-300 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap border border-purple-600/30">Admin</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Apps Grid -->
+            <div id="appsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6">
+                <!-- JS will fill -->
+            </div>
+
+            <!-- Admin Panel -->
+            <div id="adminPanel" class="hidden mt-8">
+                <div class="bg-black/50 backdrop-blur-md rounded-2xl p-5 border border-purple-500/20">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-semibold flex items-center gap-2 text-white"><i class="fas fa-crown text-purple-400"></i> Admin dashboard</h2>
+                        <button onclick="logoutAdmin()" class="text-sm bg-gray-700/80 hover:bg-gray-600 px-4 py-2 rounded-full transition flex items-center gap-2 text-white"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <!-- Add app -->
+                        <div class="bg-gray-800/60 backdrop-blur-sm rounded-xl p-4 border border-gray-700">
+                            <h3 class="font-medium mb-3 flex items-center gap-2 text-gray-300"><i class="fas fa-plus-circle text-purple-400"></i> Add from Vercel</h3>
+                            <input type="url" id="vercelUrl" placeholder="https://your-app.vercel.app" 
+                                class="w-full p-2 rounded-lg bg-gray-700/80 border border-gray-600 text-white placeholder:text-gray-400 mb-2 focus:outline-none focus:ring-1 focus:ring-purple-500">
+                            <button onclick="simulateFetch()" class="gradient-btn w-full justify-center py-2">
+                                <i class="fas fa-magic"></i> Fetch & Add
+                            </button>
+                        </div>
+                        <!-- Activity log -->
+                        <div class="bg-gray-800/60 backdrop-blur-sm rounded-xl p-4 border border-gray-700">
+                            <h3 class="font-medium mb-3 flex items-center gap-2 text-gray-300"><i class="fas fa-history text-purple-400"></i> User activities</h3>
+                            <div id="activityLog" class="space-y-2 max-h-48 overflow-y-auto pr-2 text-sm text-gray-300">
+                                <!-- JS will fill -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== ADMIN MODAL ========== -->
+    <div id="adminModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden backdrop-blur-sm">
+        <div class="bg-gray-800 rounded-2xl p-8 w-full max-w-md shadow-2xl border border-gray-700">
+            <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 text-white"><i class="fas fa-lock text-purple-400"></i> Admin access</h2>
+            <input type="password" id="adminPassword" placeholder="Enter password" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white mb-4 focus:outline-none focus:ring-2 focus:ring-purple-500">
+            <div class="flex justify-end gap-3">
+                <button onclick="closeAdminModal()" class="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition text-white">Cancel</button>
+                <button onclick="checkAdminPassword()" class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-purple-700 hover:opacity-90 transition text-white font-semibold">Unlock</button>
+            </div>
+            <p id="adminError" class="text-red-400 text-sm mt-3 hidden">Incorrect password</p>
+        </div>
+    </div>
+
+    <script>
+        // ========== SUPABASE CONFIG (YOUR PROJECT) ==========
+        const SUPABASE_URL = 'https://fvicrbnpxrjlurcubwwo.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2aWNyYm5weHJqbHVyY3Vid3dvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0ODMyMDksImV4cCI6MjA4NzA1OTIwOX0.5Vb2c1qUjDPlMSKuh_7_J0gUEpm3O36EhuuHagc4x_I';
+        const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // ========== GLOBAL DATA ==========
+        let apps = [];
+        let activities = [];
+        let adminAuthenticated = false;
+        let currentUser = '';
+
+        // ========== LOGIN HANDLER ==========
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            document.getElementById('loginError').classList.add('hidden');
+            const username = document.getElementById('usernameInput').value.trim();
+            if (!username) return;
+
+            currentUser = username;
+            document.getElementById('welcomeUser').innerText = `Welcome ${username}`;
+            document.getElementById('loginContainer').classList.add('hidden');
+            document.getElementById('dashboardContainer').classList.remove('hidden');
+            sessionStorage.setItem('alphaUser', username);
+
+            try {
+                await addActivity('User login', `User "${username}" logged in`);
+            } catch (err) {
+                console.warn('Activity log failed (maybe tables missing?)', err);
+            }
+        });
+
+        // Auto-login if session exists
+        (function initSession() {
+            const savedUser = sessionStorage.getItem('alphaUser');
+            if (savedUser) {
+                currentUser = savedUser;
+                document.getElementById('welcomeUser').innerText = `Welcome ${savedUser}`;
+                document.getElementById('loginContainer').classList.add('hidden');
+                document.getElementById('dashboardContainer').classList.remove('hidden');
+            }
+        })();
+
+        // ========== REAL-TIME SUBSCRIPTIONS ==========
+        sbClient
+            .channel('apps-channel')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'apps' }, () => {
+                fetchApps();
+            })
+            .subscribe();
+
+        let activitiesChannel = null;
+        function subscribeToActivities() {
+            if (activitiesChannel) sbClient.removeChannel(activitiesChannel);
+            activitiesChannel = sbClient
+                .channel('activities-channel')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'activities' }, () => {
+                    if (adminAuthenticated) fetchActivities();
+                })
+                .subscribe();
+        }
+
+        // Initial fetch
+        fetchApps();
+
+        async function fetchApps() {
+            const { data, error } = await sbClient
+                .from('apps')
+                .select('*')
+                .order('addedAt', { ascending: false });
+            if (error) {
+                console.error('Error fetching apps:', error);
+                document.getElementById('appsGrid').innerHTML = `<div class="col-span-full text-center py-16 text-gray-400">
+                    <i class="fas fa-exclamation-triangle text-6xl mb-4 opacity-30"></i>
+                    <p>Could not load apps. Make sure the 'apps' table exists.</p>
+                </div>`;
+            } else {
+                apps = data;
+                renderApps();
+            }
+        }
+
+        async function fetchActivities() {
+            const { data, error } = await sbClient
+                .from('activities')
+                .select('*')
+                .order('timestamp', { ascending: false })
+                .limit(50);
+            if (error) console.error('Error fetching activities:', error);
+            else {
+                activities = data;
+                if (adminAuthenticated) renderActivities();
+            }
+        }
+
+        // ========== USER LOGOUT ==========
+        window.logoutUser = function() {
+            if (currentUser) {
+                addActivity('User logout', `User "${currentUser}" logged out`).catch(() => {});
+            }
+            sessionStorage.removeItem('alphaUser');
+            document.getElementById('dashboardContainer').classList.add('hidden');
+            document.getElementById('loginContainer').classList.remove('hidden');
+            if (adminAuthenticated) {
+                adminAuthenticated = false;
+                document.getElementById('adminPanel').classList.add('hidden');
+                document.getElementById('lockBtn').innerHTML = '<i class="fas fa-lock text-2xl lock-icon"></i>';
+            }
+            currentUser = '';
+        };
+
+        // ========== ADMIN MODAL ==========
+        window.showAdminModal = function() {
+            document.getElementById('adminModal').classList.remove('hidden');
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('adminError').classList.add('hidden');
+        };
+
+        window.closeAdminModal = function() {
+            document.getElementById('adminModal').classList.add('hidden');
+        };
+
+        window.checkAdminPassword = function() {
+            const pwd = document.getElementById('adminPassword').value;
+            if (pwd === 'ak2026!') {
+                adminAuthenticated = true;
+                addActivity('Admin login', 'Successful login');
+                document.getElementById('adminPanel').classList.remove('hidden');
+                document.getElementById('lockBtn').innerHTML = '<i class="fas fa-lock-open text-2xl text-purple-400"></i>';
+                closeAdminModal();
+                subscribeToActivities();
+                fetchActivities();
+            } else {
+                document.getElementById('adminError').classList.remove('hidden');
+            }
+        };
+
+        window.logoutAdmin = function() {
+            adminAuthenticated = false;
+            document.getElementById('adminPanel').classList.add('hidden');
+            document.getElementById('lockBtn').innerHTML = '<i class="fas fa-lock text-2xl lock-icon"></i>';
+            addActivity('Admin logout', 'Logged out');
+            if (activitiesChannel) {
+                sbClient.removeChannel(activitiesChannel);
+                activitiesChannel = null;
+            }
+        };
+
+        // ========== RENDER FUNCTIONS ==========
+        function stringToColor(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const hue = 40 + (Math.abs(hash) % 20);
+            return `hsl(${hue}, 85%, 55%)`;
+        }
+
+        function renderApps() {
+            const grid = document.getElementById('appsGrid');
+            if (apps.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-16 text-gray-400">
+                    <i class="fas fa-box-open text-6xl mb-4 opacity-30"></i>
+                    <p>No apps yet. Admin can add them.</p>
+                </div>`;
+                return;
+            }
+
+            grid.innerHTML = apps.map(app => {
+                const firstLetter = app.name.charAt(0).toUpperCase();
+                const bgColor = stringToColor(app.name);
+                if (app.name === "Demographics") {
+                    return `
+                        <div class="app-card-bg flex flex-col items-center text-center">
+                            <div class="demographics-logo-bg">
+                                <span style="font-weight: bold; font-size: 1.5em;">🌐👥 Demographics</span>
+                            </div>
+                            <h3 class="font-medium text-white text-base mb-4 truncate w-full">${escapeHtml(app.name)}</h3>
+                            <a href="${escapeHtml(app.url)}" target="_blank" class="launch-btn-bg w-full justify-center">
+                                <i class="fas fa-rocket"></i> Launch app
+                            </a>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="app-card-bg flex flex-col items-center text-center">
+                            <div class="app-logo-bg" style="background: ${bgColor};">${firstLetter}</div>
+                            <h3 class="font-medium text-white text-base mb-4 truncate w-full">${escapeHtml(app.name)}</h3>
+                            <a href="${escapeHtml(app.url)}" target="_blank" class="launch-btn-bg w-full justify-center">
+                                <i class="fas fa-rocket"></i> Launch app
+                            </a>
+                        </div>
+                    `;
+                }
+            }).join('');
+        }
+
+        function renderActivities() {
+            const logDiv = document.getElementById('activityLog');
+            if (activities.length === 0) {
+                logDiv.innerHTML = '<p class="text-gray-400 italic text-center py-4">No activities yet</p>';
+                return;
+            }
+            logDiv.innerHTML = activities.map(act => {
+                const time = act.timestamp ? new Date(act.timestamp).toLocaleTimeString() : 'just now';
+                return `
+                    <div class="border-b border-gray-700 pb-2 last:border-0">
+                        <div class="flex justify-between text-gray-300 text-xs">
+                            <span class="font-medium text-purple-400">${escapeHtml(act.action)}</span>
+                            <span class="text-gray-500">${time}</span>
+                        </div>
+                        <div class="text-xs text-gray-400">${escapeHtml(act.details)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function escapeHtml(unsafe) {
+            if (!unsafe) return unsafe;
+            return unsafe.replace(/[&<>"']/g, function(m) {
+                if(m === '&') return '&amp;';
+                if(m === '<') return '&lt;';
+                if(m === '>') return '&gt;';
+                if(m === '"') return '&quot;';
+                if(m === "'") return '&#039;';
+                return m;
+            });
+        }
+
+        // ========== ADD ACTIVITY ==========
+        async function addActivity(action, details) {
+            const { error } = await sbClient.from('activities').insert([
+                { action, details, timestamp: new Date().toISOString() }
+            ]);
+            if (error) throw error;
+        }
+
+        // ========== SIMULATED FETCH ==========
+        window.simulateFetch = async function() {
+            if (!adminAuthenticated) {
+                alert('You must be logged in as admin first.');
+                return;
+            }
+            const url = document.getElementById('vercelUrl').value.trim();
+            if (!url) {
+                alert('Please enter a Vercel URL');
+                return;
+            }
+            let hostname = url.replace('https://', '').replace('http://', '').split('/')[0];
+            let name = hostname.split('.')[0];
+            name = name.charAt(0).toUpperCase() + name.slice(1);
+
+            const { error } = await sbClient.from('apps').insert([
+                { name, url, addedAt: new Date().toISOString() }
+            ]);
+            if (error) {
+                alert('Error adding app: ' + error.message);
+            } else {
+                addActivity('App added', `"${name}" from ${url}`);
+                document.getElementById('vercelUrl').value = '';
+            }
+        };
+
+        // ========== CLOSE MODAL ON OUTSIDE CLICK ==========
+        window.onclick = function(event) {
+            const modal = document.getElementById('adminModal');
+            if (event.target === modal) closeAdminModal();
+        };
+    </script>
+</body>
+</html>
