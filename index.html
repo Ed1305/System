@@ -12,11 +12,11 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: #0b0f1a; }
-        /* ---------- LOGIN PAGE (background image, card on left) ---------- */
+        /* ---------- LOGIN PAGE ---------- */
         .login-page {
             min-height: 100vh;
             width: 100%;
-            background-image: url('https://i.ibb.co/jkctLPLq/logo.png');
+            background-image: url('https://i.ibb.co/PZ9PWprF/top-view-desk-concept-with-clipboard.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -89,56 +89,86 @@
             opacity: 0.9;
         }
 
-        /* ---------- DASHBOARD BACKGROUND ---------- */
+        /* ---------- DASHBOARD BACKGROUND (directly under apps) ---------- */
         .dashboard-with-bg {
-            background-image: url('https://i.ibb.co/4g0SvNMt/logo1.png');
+            background-image: url('https://i.ibb.co/ycz053BH/top-view-desk-concept-with-mock-up-smarpthone.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
             min-height: 100vh;
         }
-        .content-overlay {
-            background: rgba(10, 12, 22, 0.7);
-            backdrop-filter: blur(8px);
-            border-radius: 32px;
-            padding: 2rem;
-            color: #e0e0e0;
-        }
 
-        /* ---------- ENHANCED APP CARDS (now smaller) ---------- */
+        /* ---------- DARKER CLICKABLE APP CARDS ---------- */
         .app-card-enhanced {
-            background: rgba(22, 26, 40, 0.75);
+            display: block;
+            background: rgba(12, 16, 28, 0.85);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(139, 92, 246, 0.15);
             border-radius: 24px;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            padding: 1.25rem 1rem; /* reduced padding */
-            box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.6);
+            transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+            padding: 1.2rem 1rem;
+            box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.6);
             position: relative;
-            overflow: hidden;
+            overflow: visible;
+            z-index: 1;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
         }
+        .app-card-enhanced:hover {
+            cursor: pointer;
+        }
+
         .app-card-enhanced::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 3px;
+            height: 2px;
             background: linear-gradient(90deg, #8b5cf6, #6d28d9, #8b5cf6);
             background-size: 200% 100%;
             animation: gradientShift 4s ease infinite;
             opacity: 0;
             transition: opacity 0.3s;
+            z-index: 2;
+            border-radius: 24px 24px 0 0;
+            pointer-events: none;
         }
         .app-card-enhanced:hover::before {
             opacity: 1;
         }
+
         .app-card-enhanced:hover {
-            transform: translateY(-4px);
-            border-color: rgba(139, 92, 246, 0.5);
-            box-shadow: 0 20px 32px -12px rgba(139, 92, 246, 0.4);
-            background: rgba(28, 32, 48, 0.85);
+            transform: translateY(-5px);
+            border-color: transparent;
+            background: rgba(6, 10, 18, 0.95);
+            box-shadow: 
+                0 30px 45px -15px rgba(139, 92, 246, 0.6),
+                0 0 0 2px rgba(139, 92, 246, 0.3) inset,
+                0 0 0 4px rgba(236, 72, 153, 0.2) inset;
         }
+
+        .app-card-enhanced:hover::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 26px;
+            background: linear-gradient(145deg, #8b5cf6, #ec4899, #f59e0b, #8b5cf6);
+            background-size: 300% 300%;
+            animation: gradientRotate 4s ease infinite;
+            z-index: -1;
+            opacity: 0.8;
+            filter: blur(2px);
+            pointer-events: none;
+        }
+
+        @keyframes gradientRotate {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         @keyframes gradientShift {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -146,17 +176,17 @@
         }
 
         .app-logo-enhanced {
-            width: 56px; /* reduced from 70px */
-            height: 56px;
-            border-radius: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 1.6rem; /* slightly smaller */
+            font-size: 1.7rem;
             color: white;
-            box-shadow: 0 10px 16px -6px rgba(0, 0, 0, 0.6);
-            margin-bottom: 1rem; /* reduced margin */
+            box-shadow: 0 8px 12px -5px rgba(0, 0, 0, 0.6);
+            margin: 0 auto 1rem auto;
             background: linear-gradient(145deg, #2a2a4a, #1a1a30);
             transition: transform 0.2s;
         }
@@ -166,71 +196,63 @@
         .app-logo-enhanced.render {
             background: linear-gradient(145deg, #1e3a5f, #0e2a40);
         }
+        .app-logo-enhanced.cloudflare {
+            background: linear-gradient(145deg, #b45309, #7b341e);
+        }
 
         .demographics-logo-enhanced {
-            width: 56px;
-            height: 56px;
-            border-radius: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 1rem;
+            margin: 0 auto 1rem auto;
             background: transparent;
             color: white;
-            font-size: 1.4rem;
+            font-size: 1.6rem;
             font-weight: bold;
             transition: transform 0.2s;
         }
         .app-card-enhanced:hover .demographics-logo-enhanced {
             transform: scale(1.05);
         }
+        .demographics-logo-enhanced span {
+            font-size: 1.6em;
+        }
 
         .app-name {
-            font-size: 0.95rem; /* reduced from 1.1rem */
+            font-size: 1rem;
             font-weight: 600;
             color: white;
-            margin-bottom: 1rem; /* reduced margin */
+            margin-bottom: 0.25rem;
             letter-spacing: 0.2px;
+            text-align: center;
         }
 
-        .launch-btn-enhanced {
-            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
-            color: white;
-            font-weight: 600;
-            border-radius: 9999px;
-            padding: 0.5rem 1.2rem; /* reduced padding */
-            font-size: 0.8rem; /* smaller font */
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.4rem;
-            width: 100%;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 6px 12px -4px rgba(0, 0, 0, 0.4);
-            text-decoration: none;
-        }
-        .launch-btn-enhanced:hover {
-            background: linear-gradient(135deg, #9b6cf7, #7d38da);
-            transform: scale(1.02);
-            box-shadow: 0 10px 18px -6px rgba(139, 92, 246, 0.5);
+        .app-description {
+            font-size: 0.7rem;
+            color: #a0a0a0;
+            margin-bottom: 0.5rem;
+            text-align: center;
+            line-height: 1.2;
         }
 
-        /* Platform badge */
         .platform-badge-enhanced {
             position: absolute;
-            top: 12px; /* adjusted */
+            top: 12px;
             right: 12px;
-            padding: 0.2rem 0.7rem; /* smaller */
+            padding: 0.2rem 0.6rem;
             border-radius: 30px;
-            font-size: 0.65rem; /* smaller */
+            font-size: 0.65rem;
             font-weight: 600;
             letter-spacing: 0.2px;
             text-transform: uppercase;
             border: 1px solid;
             backdrop-filter: blur(4px);
             background: rgba(0, 0, 0, 0.3);
+            z-index: 5;
+            pointer-events: none;
         }
         .badge-vercel-enhanced {
             background: rgba(255, 255, 255, 0.1);
@@ -242,19 +264,30 @@
             color: #7dd3fc;
             border-color: rgba(0, 180, 255, 0.3);
         }
-
-        /* Other UI elements (unchanged) */
-        .lock-icon {
-            color: #c0c0d0;
-            transition: all 0.2s;
+        .badge-cloudflare-enhanced {
+            background: rgba(255, 140, 0, 0.15);
+            color: #fbbf24;
+            border-color: rgba(255, 140, 0, 0.3);
         }
-        .lock-icon:hover {
-            color: white;
-            transform: scale(1.1);
+
+        .apps-grid {
+            gap: 1rem;
+        }
+
+        /* ---------- TOP BAR TEXT COLORS BLACK ---------- */
+        .dashboard-title {
+            color: #1f2937;
+        }
+        .dashboard-subtitle {
+            color: #374151;
+        }
+        .welcome-text {
+            color: #1f2937;
+            font-weight: 500;
         }
         .user-logout-btn-bg {
             background: rgba(42, 42, 60, 0.8);
-            color: #c0c0d0;
+            color: #ffffff;
             border: 1px solid rgba(139, 92, 246, 0.3);
             border-radius: 9999px;
             padding: 0.25rem 0.75rem;
@@ -268,8 +301,17 @@
         }
         .user-logout-btn-bg:hover {
             background: rgba(58, 58, 76, 0.9);
-            color: white;
+            color: black;
         }
+        .lock-icon {
+            color: #1f2937;
+            transition: all 0.2s;
+        }
+        .lock-icon:hover {
+            color: black;
+            transform: scale(1.1);
+        }
+
         .gradient-btn {
             background: linear-gradient(135deg, #eb4747, #f44f4f);
             color: #1f2937;
@@ -293,97 +335,91 @@
 </head>
 <body>
 
-    <!-- ========== LOGIN PAGE (card on left) ========== -->
+    <!-- ========== LOGIN PAGE ========== -->
     <div id="loginContainer" class="login-page">
         <div class="login-card-exact">
             <h1>Welcome</h1>
             <div class="subtitle">Please enter your name</div>
-
             <form id="loginForm">
                 <div class="input-label">YOUR NAME</div>
-                <input type="text" id="usernameInput" placeholder=" " required>
+                <input type="text" id="usernameInput" placeholder="" required>
                 <button type="submit" class="btn-login">
                     <i class="fas fa-lock"></i> Access
                 </button>
             </form>
-
             <div id="loginError" class="text-red-500 text-sm mt-4 hidden"></div>
         </div>
     </div>
 
     <!-- ========== MAIN DASHBOARD ========== -->
     <div id="dashboardContainer" class="hidden w-full p-6 overflow-y-auto min-h-screen dashboard-with-bg">
-        <div class="content-overlay">
-            <!-- Top bar -->
-            <div class="flex justify-between items-start mb-6">
-                <div>
-                    <h1 class="text-3xl font-bold text-white flex items-center gap-2">
-                        <i class="fas fa-cubes text-purple-400"></i> Alpha Konnect
-                    </h1>
-                    <p class="text-sm text-gray-300 mt-1">internal Hub</p>
-                </div>
-                <div class="flex items-center gap-3">
-                    <span id="welcomeUser" class="text-sm font-medium text-gray-300"></span>
-                    <button onclick="logoutUser()" class="user-logout-btn-bg" title="Logout">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </button>
-                    <button id="lockBtn" onclick="showAdminModal()" class="relative group">
-                        <i class="fas fa-lock text-2xl lock-icon"></i>
-                        <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 text-xs bg-gray-800 text-purple-300 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap border border-purple-600/30">Admin</span>
-                    </button>
-                </div>
+        <!-- Top bar with black text -->
+        <div class="flex justify-between items-start mb-6">
+            <div>
+                <h1 class="text-3xl font-bold dashboard-title flex items-center gap-2">
+                    <i class="fas fa-cubes text-purple-400"></i> Alpha Konnect
+                </h1>
+                <p class="text-sm dashboard-subtitle mt-1">internal Hub</p>
             </div>
-
-            <!-- Apps Grid (with smaller cards) -->
-            <div id="appsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mb-6">
-                <!-- JS will fill -->
+            <div class="flex items-center gap-3">
+                <span id="welcomeUser" class="text-sm font-medium welcome-text"></span>
+                <button onclick="logoutUser()" class="user-logout-btn-bg" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+                <button id="lockBtn" onclick="showAdminModal()" class="relative group">
+                    <i class="fas fa-lock text-2xl lock-icon"></i>
+                    <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 text-xs bg-gray-800 text-purple-300 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap border border-purple-600/30">Admin</span>
+                </button>
             </div>
+        </div>
 
-            <!-- Admin Panel (with Render API key and platform selector) -->
-            <div id="adminPanel" class="hidden mt-8">
-                <div class="bg-black/50 backdrop-blur-md rounded-2xl p-5 border border-purple-500/20">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-semibold flex items-center gap-2 text-white"><i class="fas fa-crown text-purple-400"></i> Admin dashboard</h2>
-                        <button onclick="logoutAdmin()" class="text-sm bg-gray-700/80 hover:bg-gray-600 px-4 py-2 rounded-full transition flex items-center gap-2 text-white"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        <!-- Apps Grid -->
+        <div id="appsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6 apps-grid">
+            <!-- JS will fill -->
+        </div>
+
+        <!-- Admin Panel -->
+        <div id="adminPanel" class="hidden mt-8">
+            <div class="bg-black/50 backdrop-blur-md rounded-2xl p-5 border border-purple-500/20">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold flex items-center gap-2 text-white"><i class="fas fa-crown text-purple-400"></i> Admin dashboard</h2>
+                    <button onclick="logoutAdmin()" class="text-sm bg-gray-700/80 hover:bg-gray-600 px-4 py-2 rounded-full transition flex items-center gap-2 text-white"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                </div>
+
+                <!-- Render API Key input -->
+                <div class="mb-4 p-4 bg-gray-800/60 rounded-xl border border-gray-700">
+                    <h3 class="font-medium mb-2 flex items-center gap-2 text-gray-300"><i class="fas fa-key text-purple-400"></i> Render API Key</h3>
+                    <div class="flex gap-2">
+                        <input type="password" id="renderApiKey" placeholder="Enter your Render API key" 
+                               class="flex-1 p-2 rounded-lg bg-gray-700/80 border border-gray-600 text-white placeholder:text-gray-400">
+                        <button onclick="saveRenderApiKey()" class="gradient-btn px-4 py-2">Save</button>
                     </div>
+                    <p class="text-xs text-gray-500 mt-1">Stored securely in database and used for auto-discovery.</p>
+                </div>
 
-                    <!-- Render API Key input -->
-                    <div class="mb-4 p-4 bg-gray-800/60 rounded-xl border border-gray-700">
-                        <h3 class="font-medium mb-2 flex items-center gap-2 text-gray-300"><i class="fas fa-key text-purple-400"></i> Render API Key</h3>
-                        <div class="flex gap-2">
-                            <input type="password" id="renderApiKey" placeholder="Enter your Render API key" 
-                                   class="flex-1 p-2 rounded-lg bg-gray-700/80 border border-gray-600 text-white placeholder:text-gray-400">
-                            <button onclick="saveRenderApiKey()" class="gradient-btn px-4 py-2">Save</button>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <!-- Add app -->
+                    <div class="bg-gray-800/60 backdrop-blur-sm rounded-xl p-4 border border-gray-700">
+                        <h3 class="font-medium mb-3 flex items-center gap-2 text-gray-300"><i class="fas fa-plus-circle text-purple-400"></i> Add from Vercel / Render / Cloudflare</h3>
+                        <div class="mb-3">
+                            <label class="block text-xs text-gray-400 mb-1">Platform</label>
+                            <select id="platformSelect" class="w-full p-2 rounded-lg bg-gray-700/80 border border-gray-600 text-white">
+                                <option value="vercel">Vercel</option>
+                                <option value="render">Render</option>
+                                <option value="cloudflare">Cloudflare Workers</option>
+                            </select>
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">Stored securely in database and used for auto-discovery.</p>
+                        <input type="url" id="appUrl" placeholder="https://your-app.vercel.app / .onrender.com / .workers.dev" 
+                            class="w-full p-2 rounded-lg bg-gray-700/80 border border-gray-600 text-white placeholder:text-gray-400 mb-2 focus:outline-none focus:ring-1 focus:ring-purple-500">
+                        <button onclick="addAppFromPlatform()" class="gradient-btn w-full justify-center py-2">
+                            <i class="fas fa-magic"></i> Fetch & Add
+                        </button>
                     </div>
-
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <!-- Add app (platform selector + URL) -->
-                        <div class="bg-gray-800/60 backdrop-blur-sm rounded-xl p-4 border border-gray-700">
-                            <h3 class="font-medium mb-3 flex items-center gap-2 text-gray-300"><i class="fas fa-plus-circle text-purple-400"></i> Add from Vercel / Render</h3>
-                            
-                            <div class="mb-3">
-                                <label class="block text-xs text-gray-400 mb-1">Platform</label>
-                                <select id="platformSelect" class="w-full p-2 rounded-lg bg-gray-700/80 border border-gray-600 text-white">
-                                    <option value="vercel">Vercel</option>
-                                    <option value="render">Render</option>
-                                </select>
-                            </div>
-
-                            <input type="url" id="appUrl" placeholder="https://your-app.vercel.app or https://your-app.onrender.com" 
-                                class="w-full p-2 rounded-lg bg-gray-700/80 border border-gray-600 text-white placeholder:text-gray-400 mb-2 focus:outline-none focus:ring-1 focus:ring-purple-500">
-                            
-                            <button onclick="addAppFromPlatform()" class="gradient-btn w-full justify-center py-2">
-                                <i class="fas fa-magic"></i> Fetch & Add
-                            </button>
-                        </div>
-                        <!-- Activity log -->
-                        <div class="bg-gray-800/60 backdrop-blur-sm rounded-xl p-4 border border-gray-700">
-                            <h3 class="font-medium mb-3 flex items-center gap-2 text-gray-300"><i class="fas fa-history text-purple-400"></i> User activities</h3>
-                            <div id="activityLog" class="space-y-2 max-h-48 overflow-y-auto pr-2 text-sm text-gray-300">
-                                <!-- JS will fill -->
-                            </div>
+                    <!-- Activity log -->
+                    <div class="bg-gray-800/60 backdrop-blur-sm rounded-xl p-4 border border-gray-700">
+                        <h3 class="font-medium mb-3 flex items-center gap-2 text-gray-300"><i class="fas fa-history text-purple-400"></i> User activities</h3>
+                        <div id="activityLog" class="space-y-2 max-h-48 overflow-y-auto pr-2 text-sm text-gray-300">
+                            <!-- JS will fill -->
                         </div>
                     </div>
                 </div>
@@ -600,8 +636,7 @@
             let name = '';
             let appData = {};
 
-            if (platform === 'vercel') {
-                // Simulate Vercel name extraction
+            if (platform === 'vercel' || platform === 'cloudflare') {
                 let hostname = url.replace('https://', '').replace('http://', '').split('/')[0];
                 name = hostname.split('.')[0];
                 name = name.charAt(0).toUpperCase() + name.slice(1);
@@ -613,8 +648,7 @@
                 }
                 addActivity('App added', `"${name}" (${platform}) from ${url}`);
                 document.getElementById('appUrl').value = '';
-            } else {
-                // Render: call backend endpoint with API key
+            } else if (platform === 'render') {
                 const apiKey = document.getElementById('renderApiKey').value.trim();
                 if (!apiKey) {
                     alert('Please save your Render API key first.');
@@ -645,7 +679,7 @@
             }
         };
 
-        // ========== RENDER FUNCTIONS (using smaller card classes) ==========
+        // ========== RENDER FUNCTIONS ==========
         function stringToColor(str) {
             let hash = 0;
             for (let i = 0; i < str.length; i++) {
@@ -654,6 +688,19 @@
             const hue = 40 + (Math.abs(hash) % 20);
             return `hsl(${hue}, 85%, 55%)`;
         }
+
+        // UPDATED: Exact descriptions matching your database app names
+        const descriptionMap = {
+            "call-audit": "a specialized tool designed to evaluate customer service quality, ensure compliance, and boost agent performance by analyzing interactions",
+            "tenure-three": "Track Employees Track",
+            "dispo-report": "Track Call Dispositions",
+            "attrition-6lnn": "Analyze staff attrition",
+            "demographics-ten": "Analyze work force demographics",
+            "it-assets-management": "Manage and Track IT Assets",
+            "pre-interview-questionnaire": "Assess Candidates before Interviews",
+            "performancetracker-seven": "Track and analyze performance",
+            "agents-performance-stats": "View agents performance metrics"
+        };
 
         function renderApps() {
             const grid = document.getElementById('appsGrid');
@@ -669,33 +716,42 @@
                 const firstLetter = app.name.charAt(0).toUpperCase();
                 const bgColor = stringToColor(app.name);
                 const platform = app.platform || 'vercel';
-                const badgeClass = platform === 'render' ? 'badge-render-enhanced' : 'badge-vercel-enhanced';
-                const platformIcon = platform === 'vercel' ? '▲' : '☁️';
-                const logoExtraClass = platform === 'render' ? 'render' : '';
+                let badgeClass = 'badge-vercel-enhanced';
+                let platformIcon = '▲';
+                let logoExtraClass = '';
+                if (platform === 'render') {
+                    badgeClass = 'badge-render-enhanced';
+                    platformIcon = '☁️';
+                    logoExtraClass = 'render';
+                } else if (platform === 'cloudflare') {
+                    badgeClass = 'badge-cloudflare-enhanced';
+                    platformIcon = '☁️';
+                    logoExtraClass = 'cloudflare';
+                }
 
-                if (app.name === "Demographics") {
+                // Get description from map (case-sensitive, exact match)
+                let description = descriptionMap[app.name] || '';
+
+                // Special handling for demographics app (using the exact name from your DB)
+                if (app.name === "demographics-ten") {
                     return `
-                        <div class="app-card-enhanced flex flex-col items-center text-center relative">
+                        <a href="${escapeHtml(app.url)}" target="_blank" class="app-card-enhanced flex flex-col items-center text-center relative">
                             <div class="platform-badge-enhanced ${badgeClass}">${platformIcon} ${platform}</div>
                             <div class="demographics-logo-enhanced">
-                                <span style="font-weight: bold; font-size: 1.5em;">🌐👥 Demographics</span>
+                                <span style="font-weight: bold; font-size: 1.6em;">🌐👥 Demographics</span>
                             </div>
                             <h3 class="app-name">${escapeHtml(app.name)}</h3>
-                            <a href="${escapeHtml(app.url)}" target="_blank" class="launch-btn-enhanced">
-                                <i class="fas fa-rocket"></i> Launch app
-                            </a>
-                        </div>
+                            <p class="app-description">${escapeHtml(description)}</p>
+                        </a>
                     `;
                 } else {
                     return `
-                        <div class="app-card-enhanced flex flex-col items-center text-center relative">
+                        <a href="${escapeHtml(app.url)}" target="_blank" class="app-card-enhanced flex flex-col items-center text-center relative">
                             <div class="platform-badge-enhanced ${badgeClass}">${platformIcon} ${platform}</div>
                             <div class="app-logo-enhanced ${logoExtraClass}" style="background: ${bgColor};">${firstLetter}</div>
                             <h3 class="app-name">${escapeHtml(app.name)}</h3>
-                            <a href="${escapeHtml(app.url)}" target="_blank" class="launch-btn-enhanced">
-                                <i class="fas fa-rocket"></i> Launch app
-                            </a>
-                        </div>
+                            <p class="app-description">${escapeHtml(description)}</p>
+                        </a>
                     `;
                 }
             }).join('');
