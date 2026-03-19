@@ -89,7 +89,7 @@
             opacity: 0.9;
         }
 
-        /* ---------- DASHBOARD BACKGROUND (directly under apps) ---------- */
+        /* ---------- DASHBOARD BACKGROUND ---------- */
         .dashboard-with-bg {
             background-image: url('https://i.ibb.co/ycz053BH/top-view-desk-concept-with-mock-up-smarpthone.jpg');
             background-size: cover;
@@ -183,7 +183,7 @@
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 1.7rem;
+            font-size: 1.5rem; /* reduced from 1.7rem */
             color: white;
             box-shadow: 0 8px 12px -5px rgba(0, 0, 0, 0.6);
             margin: 0 auto 1rem auto;
@@ -210,7 +210,7 @@
             margin: 0 auto 1rem auto;
             background: transparent;
             color: white;
-            font-size: 1.6rem;
+            font-size: 1.4rem; /* reduced from 1.6rem */
             font-weight: bold;
             transition: transform 0.2s;
         }
@@ -218,11 +218,11 @@
             transform: scale(1.05);
         }
         .demographics-logo-enhanced span {
-            font-size: 1.6em;
+            font-size: 1.4em; /* reduced from 1.6em */
         }
 
         .app-name {
-            font-size: 1rem;
+            font-size: 0.9rem; /* reduced from 1rem */
             font-weight: 600;
             color: white;
             margin-bottom: 0.25rem;
@@ -231,7 +231,7 @@
         }
 
         .app-description {
-            font-size: 0.7rem;
+            font-size: 0.65rem; /* reduced from 0.7rem */
             color: #a0a0a0;
             margin-bottom: 0.5rem;
             text-align: center;
@@ -244,7 +244,7 @@
             right: 12px;
             padding: 0.2rem 0.6rem;
             border-radius: 30px;
-            font-size: 0.65rem;
+            font-size: 0.6rem; /* reduced from 0.65rem */
             font-weight: 600;
             letter-spacing: 0.2px;
             text-transform: uppercase;
@@ -274,7 +274,7 @@
             gap: 1rem;
         }
 
-        /* ---------- TOP BAR TEXT COLORS BLACK ---------- */
+        /* ---------- TOP BAR TEXT COLORS ---------- */
         .dashboard-title {
             color: #1f2937;
         }
@@ -342,7 +342,7 @@
             <div class="subtitle">Please enter your name</div>
             <form id="loginForm">
                 <div class="input-label">YOUR NAME</div>
-                <input type="text" id="usernameInput" placeholder="" required>
+                <input type="text" id="usernameInput" placeholder=" " required>
                 <button type="submit" class="btn-login">
                     <i class="fas fa-lock"></i> Access
                 </button>
@@ -689,7 +689,7 @@
             return `hsl(${hue}, 85%, 55%)`;
         }
 
-        // UPDATED: Exact descriptions matching your database app names
+        // Exact descriptions matching your database app names
         const descriptionMap = {
             "call-audit": "a specialized tool designed to evaluate customer service quality, ensure compliance, and boost agent performance by analyzing interactions",
             "tenure-three": "Track Employees Track",
@@ -732,13 +732,13 @@
                 // Get description from map (case-sensitive, exact match)
                 let description = descriptionMap[app.name] || '';
 
-                // Special handling for demographics app (using the exact name from your DB)
+                // Special handling for demographics app
                 if (app.name === "demographics-ten") {
                     return `
                         <a href="${escapeHtml(app.url)}" target="_blank" class="app-card-enhanced flex flex-col items-center text-center relative">
                             <div class="platform-badge-enhanced ${badgeClass}">${platformIcon} ${platform}</div>
                             <div class="demographics-logo-enhanced">
-                                <span style="font-weight: bold; font-size: 1.6em;">🌐👥 Demographics</span>
+                                <span style="font-weight: bold; font-size: 1.4em;">🌐👥 Demographics</span>
                             </div>
                             <h3 class="app-name">${escapeHtml(app.name)}</h3>
                             <p class="app-description">${escapeHtml(description)}</p>
