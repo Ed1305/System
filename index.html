@@ -243,10 +243,28 @@
             align-items: center;
             justify-content: space-between;
             gap: 8px;
-            min-height: 42px;
+            min-height: 52px;
+        }
+
+        .tile-text {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .tile-desc {
+            display: block;
+            font-size: 10px;
+            font-weight: 400;
+            opacity: 0.88;
+            line-height: 1.3;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .tile-title {
+            display: block;
             font-weight: 600;
             font-size: 14px;
             white-space: nowrap;
@@ -685,8 +703,42 @@
 
         let appFilterValue = '';
 
+        const descriptionMap = {
+            'dispo-report': 'Track call dispositions',
+            'it-assets-management': 'Manage and track IT assets',
+            'demographics-rust': 'Workforce demographics & retention',
+            'pre-interview-questionnaire': 'Assess candidates before interviews',
+            'performancetracker-seven': 'Track and analyze performance',
+            'agents-performance-stats': 'View agent performance metrics',
+            'attrition-6lnn': 'Analyze staff attrition',
+            'tenure-three': 'Track employee tenure',
+            'rehired-staff': 'Monitor rehired staff',
+            'bonus-tracker': 'Track staff bonuses',
+            'bonus-tracker-5fru': 'Track staff bonuses',
+            'call-audit': 'Evaluate calls and agent quality',
+        };
+
         function formatAppName(name) {
             return name.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        }
+
+        function getAppDescription(name) {
+            const key = name.toLowerCase();
+            if (descriptionMap[key]) return descriptionMap[key];
+
+            const n = key;
+            if (n.includes('demographic')) return 'Workforce demographics & retention';
+            if (n.includes('attrition')) return 'Analyze staff attrition';
+            if (n.includes('tenure')) return 'Track employee tenure';
+            if (n.includes('dispo')) return 'Track call dispositions';
+            if (n.includes('asset')) return 'Manage and track IT assets';
+            if (n.includes('interview')) return 'Assess candidates before interviews';
+            if (n.includes('performance') || n.includes('tracker')) return 'Track and analyze performance';
+            if (n.includes('agent')) return 'View agent performance metrics';
+            if (n.includes('bonus')) return 'Track staff bonuses';
+            if (n.includes('rehired')) return 'Monitor rehired staff';
+            if (n.includes('call') || n.includes('audit')) return 'Evaluate calls and agent quality';
+            return 'Internal web application';
         }
 
         function getAppSvg(name) {
@@ -736,18 +788,22 @@
                 const colors = getTileColor(index);
                 const platform = (app.platform || 'vercel');
                 const displayName = formatAppName(app.name);
+                const description = getAppDescription(app.name);
 
                 return `
                     <a href="${escapeHtml(app.url)}" target="_blank" rel="noopener noreferrer"
                        class="tile-card"
                        style="--tile-color:${colors.main};--tile-dark:${colors.dark};"
-                       title="${escapeHtml(displayName)}">
+                       title="${escapeHtml(description)}">
                         <div class="tile-body">
                             ${getAppSvg(app.name)}
                             <span class="tile-meta">${escapeHtml(platform)}</span>
                         </div>
                         <div class="tile-footer">
-                            <span class="tile-title">${escapeHtml(displayName)}</span>
+                            <div class="tile-text">
+                                <span class="tile-desc">${escapeHtml(description)}</span>
+                                <span class="tile-title">${escapeHtml(displayName)}</span>
+                            </div>
                             <span class="tile-arrow">${ARROW_SVG}</span>
                         </div>
                     </a>
