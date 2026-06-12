@@ -89,227 +89,193 @@
             opacity: 0.9;
         }
 
-        /* ---------- DASHBOARD BACKGROUND ---------- */
+        /* ---------- DASHBOARD (REFERENCE TILE LAYOUT) ---------- */
         .dashboard-with-bg {
-            background-image: url('https://i.ibb.co/ycz053BH/top-view-desk-concept-with-mock-up-smarpthone.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
+            background: #d5dae6;
             min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        /* ---------- DARKER CLICKABLE APP CARDS ---------- */
-        .app-card-enhanced {
-            display: block;
-            background: rgba(12, 16, 28, 0.85);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(139, 92, 246, 0.15);
-            border-radius: 24px;
-            transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
-            padding: 1.2rem 1rem;
-            box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.6);
-            position: relative;
-            overflow: visible;
-            z-index: 1;
-            text-decoration: none;
-            color: inherit;
-            cursor: pointer;
-        }
-        .app-card-enhanced:hover {
-            cursor: pointer;
+        .ref-dashboard {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 28px 32px 40px;
         }
 
-        .app-card-enhanced::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, #8b5cf6, #6d28d9, #8b5cf6);
-            background-size: 200% 100%;
-            animation: gradientShift 4s ease infinite;
-            opacity: 0;
-            transition: opacity 0.3s;
-            z-index: 2;
-            border-radius: 24px 24px 0 0;
-            pointer-events: none;
-        }
-        .app-card-enhanced:hover::before {
-            opacity: 1;
-        }
-
-        .app-card-enhanced:hover {
-            transform: translateY(-5px);
-            border-color: transparent;
-            background: rgba(6, 10, 18, 0.95);
-            box-shadow: 
-                0 30px 45px -15px rgba(139, 92, 246, 0.6),
-                0 0 0 2px rgba(139, 92, 246, 0.3) inset,
-                0 0 0 4px rgba(236, 72, 153, 0.2) inset;
-        }
-
-        .app-card-enhanced:hover::after {
-            content: '';
-            position: absolute;
-            inset: -2px;
-            border-radius: 26px;
-            background: linear-gradient(145deg, #8b5cf6, #ec4899, #f59e0b, #8b5cf6);
-            background-size: 300% 300%;
-            animation: gradientRotate 4s ease infinite;
-            z-index: -1;
-            opacity: 0.8;
-            filter: blur(2px);
-            pointer-events: none;
-        }
-
-        @keyframes gradientRotate {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .app-logo-enhanced {
-            width: 60px;
-            height: 60px;
-            border-radius: 18px;
+        .apps-dashboard-header {
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1.5rem; /* reduced from 1.7rem */
-            color: white;
-            box-shadow: 0 8px 12px -5px rgba(0, 0, 0, 0.6);
-            margin: 0 auto 1rem auto;
-            background: linear-gradient(145deg, #2a2a4a, #1a1a30);
-            transition: transform 0.2s;
-        }
-        .app-card-enhanced:hover .app-logo-enhanced {
-            transform: scale(1.05);
-        }
-        .app-logo-enhanced.render {
-            background: linear-gradient(145deg, #1e3a5f, #0e2a40);
-        }
-        .app-logo-enhanced.cloudflare {
-            background: linear-gradient(145deg, #b45309, #7b341e);
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 28px;
         }
 
-        .demographics-logo-enhanced {
-            width: 60px;
-            height: 60px;
-            border-radius: 18px;
+        .dashboard-badge {
+            background: #17a2b8;
+            color: #fff;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 10px 22px;
+            border-radius: 22px;
+            border: none;
+            letter-spacing: 0.2px;
+        }
+
+        .header-actions {
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
-            justify-content: center;
-            margin: 0 auto 1rem auto;
-            background: transparent;
-            color: white;
-            font-size: 1.4rem; /* reduced from 1.6rem */
-            font-weight: bold;
-            transition: transform 0.2s;
-        }
-        .app-card-enhanced:hover .demographics-logo-enhanced {
-            transform: scale(1.05);
-        }
-        .demographics-logo-enhanced span {
-            font-size: 1.4em; /* reduced from 1.6em */
+            gap: 10px;
         }
 
-        .app-name {
-            font-size: 0.9rem; /* reduced from 1rem */
-            font-weight: 600;
-            color: white;
-            margin-bottom: 0.25rem;
-            letter-spacing: 0.2px;
-            text-align: center;
-        }
-
-        .app-description {
-            font-size: 0.65rem; /* reduced from 0.7rem */
-            color: #a0a0a0;
-            margin-bottom: 0.5rem;
-            text-align: center;
-            line-height: 1.2;
-        }
-
-        .platform-badge-enhanced {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            padding: 0.2rem 0.6rem;
-            border-radius: 30px;
-            font-size: 0.6rem; /* reduced from 0.65rem */
-            font-weight: 600;
-            letter-spacing: 0.2px;
-            text-transform: uppercase;
-            border: 1px solid;
-            backdrop-filter: blur(4px);
-            background: rgba(0, 0, 0, 0.3);
-            z-index: 5;
-            pointer-events: none;
-        }
-        .badge-vercel-enhanced {
-            background: rgba(255, 255, 255, 0.1);
-            color: #e5e5e5;
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-        .badge-render-enhanced {
-            background: rgba(0, 180, 255, 0.15);
-            color: #7dd3fc;
-            border-color: rgba(0, 180, 255, 0.3);
-        }
-        .badge-cloudflare-enhanced {
-            background: rgba(255, 140, 0, 0.15);
-            color: #fbbf24;
-            border-color: rgba(255, 140, 0, 0.3);
-        }
-
-        .apps-grid {
-            gap: 1rem;
-        }
-
-        /* ---------- TOP BAR TEXT COLORS ---------- */
-        .dashboard-title {
-            color: #1f2937;
-        }
-        .dashboard-subtitle {
-            color: #374151;
-        }
         .welcome-text {
-            color: #1f2937;
+            color: #4a5568;
             font-weight: 500;
+            font-size: 13px;
         }
-        .user-logout-btn-bg {
-            background: rgba(42, 42, 60, 0.8);
-            color: #ffffff;
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            border-radius: 9999px;
-            padding: 0.25rem 0.75rem;
-            font-size: 0.75rem;
+
+        .filter-box {
+            display: flex;
+            align-items: stretch;
+        }
+
+        .filter-select {
+            appearance: none;
+            -webkit-appearance: none;
+            border: 1px solid #b8c0cc;
+            border-right: none;
+            padding: 8px 36px 8px 14px;
+            font-size: 13px;
+            min-width: 220px;
+            outline: none;
+            background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23666' d='M1 1l5 5 5-5'/%3E%3C/svg%3E") no-repeat right 12px center;
+            color: #333;
+            border-radius: 3px 0 0 3px;
+        }
+
+        .search-go-btn {
+            background: #5cb85c;
+            color: #fff;
+            border: 1px solid #4cae4c;
+            padding: 8px 18px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 0 3px 3px 0;
+            transition: background 0.15s;
+        }
+
+        .search-go-btn:hover { background: #4cae4c; }
+
+        .header-icon-btn {
+            width: 34px;
+            height: 34px;
+            border: 1px solid #b8c0cc;
+            background: #fff;
+            color: #555;
+            border-radius: 3px;
+            cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 0.25rem;
-            transition: all 0.2s;
-            cursor: pointer;
-            backdrop-filter: blur(4px);
+            justify-content: center;
+            font-size: 14px;
+            transition: background 0.15s;
         }
-        .user-logout-btn-bg:hover {
-            background: rgba(58, 58, 76, 0.9);
-            color: black;
+
+        .header-icon-btn:hover { background: #eef1f6; color: #111; }
+
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
         }
-        .lock-icon {
-            color: #1f2937;
-            transition: all 0.2s;
+
+        @media (max-width: 1100px) { .apps-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 800px)  { .apps-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 520px)  {
+            .apps-grid { grid-template-columns: 1fr; }
+            .filter-select { min-width: 150px; }
+            .ref-dashboard { padding: 20px 16px; }
         }
-        .lock-icon:hover {
-            color: black;
-            transform: scale(1.1);
+
+        .tile-card {
+            display: block;
+            border-radius: 6px;
+            overflow: hidden;
+            text-decoration: none;
+            color: #fff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .tile-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+        }
+
+        .tile-body {
+            background: var(--tile-color);
+            min-height: 108px;
+            padding: 18px 16px 14px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+
+        .tile-svg {
+            width: 52px;
+            height: 52px;
+            flex-shrink: 0;
+        }
+
+        .tile-meta {
+            font-size: 11px;
+            font-weight: 500;
+            opacity: 0.95;
+            margin-top: 2px;
+        }
+
+        .tile-footer {
+            background: var(--tile-dark);
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            min-height: 42px;
+        }
+
+        .tile-title {
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tile-arrow {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255, 255, 255, 0.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .tile-arrow svg {
+            width: 10px;
+            height: 10px;
+            fill: #fff;
+        }
+
+        .apps-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 4rem 1rem;
+            color: #5a6478;
         }
 
         .gradient-btn {
@@ -352,30 +318,28 @@
     </div>
 
     <!-- ========== MAIN DASHBOARD ========== -->
-    <div id="dashboardContainer" class="hidden w-full p-6 overflow-y-auto min-h-screen dashboard-with-bg">
-        <!-- Top bar with black text -->
-        <div class="flex justify-between items-start mb-6">
-            <div>
-                <h1 class="text-3xl font-bold dashboard-title flex items-center gap-2">
-                    <i class="fas fa-cubes text-purple-400"></i> Alpha Konnect
-                </h1>
-                <p class="text-sm dashboard-subtitle mt-1">internal Hub</p>
+    <div id="dashboardContainer" class="hidden w-full overflow-y-auto min-h-screen dashboard-with-bg">
+        <div class="ref-dashboard">
+            <div class="apps-dashboard-header">
+                <div class="dashboard-badge">Applications Dashboard</div>
+                <div class="header-actions">
+                    <span id="welcomeUser" class="welcome-text"></span>
+                    <div class="filter-box">
+                        <select id="appFilter" class="filter-select">
+                            <option value="">All Applications</option>
+                        </select>
+                        <button type="button" class="search-go-btn" onclick="filterApps()">Go</button>
+                    </div>
+                    <button onclick="logoutUser()" class="header-icon-btn" title="Logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                    <button id="lockBtn" onclick="showAdminModal()" class="header-icon-btn" title="Admin">
+                        <i class="fas fa-lock"></i>
+                    </button>
+                </div>
             </div>
-            <div class="flex items-center gap-3">
-                <span id="welcomeUser" class="text-sm font-medium welcome-text"></span>
-                <button onclick="logoutUser()" class="user-logout-btn-bg" title="Logout">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-                <button id="lockBtn" onclick="showAdminModal()" class="relative group">
-                    <i class="fas fa-lock text-2xl lock-icon"></i>
-                    <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 text-xs bg-gray-800 text-purple-300 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap border border-purple-600/30">Admin</span>
-                </button>
-            </div>
-        </div>
 
-        <!-- Apps Grid -->
-        <div id="appsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6 apps-grid">
-            <!-- JS will fill -->
+            <div id="appsGrid" class="apps-grid mb-6"></div>
         </div>
 
         <!-- Admin Panel -->
@@ -512,14 +476,21 @@
                 .order('addedAt', { ascending: false });
             if (error) {
                 console.error('Error fetching apps:', error);
-                document.getElementById('appsGrid').innerHTML = `<div class="col-span-full text-center py-16 text-gray-400">
-                    <i class="fas fa-exclamation-triangle text-6xl mb-4 opacity-30"></i>
-                    <p>Could not load apps. Make sure the 'apps' table exists.</p>
-                </div>`;
+                document.getElementById('appsGrid').innerHTML = '<div class="apps-empty"><p>Could not load apps. Make sure the apps table exists.</p></div>';
             } else {
                 apps = data;
+                populateAppFilter();
                 renderApps();
             }
+        }
+
+        function populateAppFilter() {
+            const sel = document.getElementById('appFilter');
+            if (!sel) return;
+            const current = sel.value;
+            sel.innerHTML = '<option value="">All Applications</option>' +
+                apps.map(app => `<option value="${escapeHtml(app.name)}">${escapeHtml(formatAppName(app.name))}</option>`).join('');
+            if (current && apps.some(a => a.name === current)) sel.value = current;
         }
 
         async function fetchActivities() {
@@ -546,7 +517,7 @@
             if (adminAuthenticated) {
                 adminAuthenticated = false;
                 document.getElementById('adminPanel').classList.add('hidden');
-                document.getElementById('lockBtn').innerHTML = '<i class="fas fa-lock text-2xl lock-icon"></i>';
+                document.getElementById('lockBtn').innerHTML = '<i class="fas fa-lock"></i>';
             }
             currentUser = '';
         };
@@ -568,7 +539,7 @@
                 adminAuthenticated = true;
                 addActivity('Admin login', 'Successful login');
                 document.getElementById('adminPanel').classList.remove('hidden');
-                document.getElementById('lockBtn').innerHTML = '<i class="fas fa-lock-open text-2xl text-purple-400"></i>';
+                document.getElementById('lockBtn').innerHTML = '<i class="fas fa-lock-open" style="color:#17a2b8"></i>';
                 closeAdminModal();
                 subscribeToActivities();
                 fetchActivities();
@@ -679,81 +650,108 @@
             }
         };
 
-        // ========== RENDER FUNCTIONS ==========
-        function stringToColor(str) {
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                hash = str.charCodeAt(i) + ((hash << 5) - hash);
-            }
-            const hue = 40 + (Math.abs(hash) % 20);
-            return `hsl(${hue}, 85%, 55%)`;
+        // ========== TILE CARD HELPERS (reference design) ==========
+        const TILE_COLORS = [
+            { main: '#4a90d9', dark: '#3a7bc8' },
+            { main: '#5cb85c', dark: '#4cae4c' },
+            { main: '#e74c3c', dark: '#c0392b' },
+            { main: '#9b59b6', dark: '#8e44ad' },
+            { main: '#f0ad4e', dark: '#ec971f' },
+            { main: '#5bc0de', dark: '#46b8da' },
+            { main: '#34495e', dark: '#2c3e50' },
+            { main: '#ec7063', dark: '#e74c3c' },
+            { main: '#af7ac5', dark: '#9b59b6' },
+            { main: '#7f8c8d', dark: '#6c7a7d' },
+        ];
+
+        const TILE_SVGS = {
+            users: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><circle cx="18" cy="16" r="6"/><path d="M6 40c0-7 5-12 12-12s12 5 12 12"/><circle cx="34" cy="18" r="4"/><path d="M28 40c0-5 3-8 8-8"/></svg>',
+            attrition: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><circle cx="20" cy="14" r="6"/><path d="M8 38c0-7 5-11 12-11"/><path d="M34 22l6 6-6 6"/><path d="M28 28h12"/></svg>',
+            tenure: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><rect x="8" y="10" width="32" height="30" rx="3"/><path d="M8 18h32"/><path d="M16 6v8M32 6v8"/><path d="M18 26l4 4 8-8"/></svg>',
+            phone: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><path d="M14 8h20l4 8-10 6 4 18H20L10 22l10-6-6-8z"/></svg>',
+            laptop: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><rect x="10" y="12" width="28" height="20" rx="2"/><path d="M6 36h36"/></svg>',
+            clipboard: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><rect x="12" y="10" width="24" height="32" rx="2"/><path d="M18 10h12v6H18z"/><path d="M18 22h12M18 28h8"/></svg>',
+            chart: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><path d="M8 38h32"/><rect x="10" y="24" width="6" height="10"/><rect x="20" y="18" width="6" height="16"/><rect x="30" y="12" width="6" height="22"/></svg>',
+            headset: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><path d="M10 24a14 14 0 0128 0"/><rect x="8" y="24" width="6" height="12" rx="2"/><rect x="34" y="24" width="6" height="12" rx="2"/></svg>',
+            coins: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><ellipse cx="20" cy="30" rx="10" ry="4"/><path d="M10 30V22c0-2 4-4 10-4s10 2 10 4v8"/><ellipse cx="28" cy="22" rx="10" ry="4"/><path d="M18 22V14c0-2 4-4 10-4s10 2 10 4v8"/></svg>',
+            userplus: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><circle cx="18" cy="16" r="6"/><path d="M6 40c0-7 5-12 12-12"/><path d="M34 20v12M28 26h12"/></svg>',
+            mic: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><rect x="18" y="8" width="12" height="20" rx="6"/><path d="M12 24a12 12 0 0024 0M24 36v6"/></svg>',
+            gears: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><circle cx="24" cy="24" r="6"/><path d="M24 8v4M24 36v4M8 24h4M36 24h4M13 13l3 3M32 32l3 3M13 35l3-3M32 16l3-3"/></svg>',
+            folder: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><path d="M6 14h14l4 4h18v22H6z"/></svg>',
+            grid: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><rect x="8" y="8" width="12" height="12"/><rect x="28" y="8" width="12" height="12"/><rect x="8" y="28" width="12" height="12"/><rect x="28" y="28" width="12" height="12"/></svg>'
+        };
+
+        const ARROW_SVG = '<svg viewBox="0 0 10 10"><path d="M2 1l5 4-5 4z"/></svg>';
+
+        let appFilterValue = '';
+
+        function formatAppName(name) {
+            return name.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
         }
 
-        // Exact descriptions matching your database app names
-        const descriptionMap = {
-            "call-audit": "a specialized tool designed to evaluate customer service quality, ensure compliance, and boost agent performance by analyzing interactions",
-            "tenure-three": "Track Employees Track",
-            "dispo-report": "Track Call Dispositions",
-            "attrition-6lnn": "Analyze staff attrition",
-            "demographics-ten": "Analyze work force demographics",
-            "it-assets-management": "Manage and Track IT Assets",
-            "pre-interview-questionnaire": "Assess Candidates before Interviews",
-            "performancetracker-seven": "Track and analyze performance",
-            "agents-performance-stats": "View agents performance metrics"
+        function getAppSvg(name) {
+            const n = name.toLowerCase();
+            if (n.includes('demographic')) return TILE_SVGS.users;
+            if (n.includes('attrition')) return TILE_SVGS.attrition;
+            if (n.includes('tenure')) return TILE_SVGS.tenure;
+            if (n.includes('dispo')) return TILE_SVGS.phone;
+            if (n.includes('asset')) return TILE_SVGS.laptop;
+            if (n.includes('interview')) return TILE_SVGS.clipboard;
+            if (n.includes('performance') || n.includes('tracker')) return TILE_SVGS.chart;
+            if (n.includes('agent')) return TILE_SVGS.headset;
+            if (n.includes('bonus')) return TILE_SVGS.coins;
+            if (n.includes('rehired')) return TILE_SVGS.userplus;
+            if (n.includes('call') || n.includes('audit')) return TILE_SVGS.mic;
+            if (n.includes('setting')) return TILE_SVGS.gears;
+            return TILE_SVGS.folder;
+        }
+
+        function getTileColor(index) {
+            return TILE_COLORS[index % TILE_COLORS.length];
+        }
+
+        window.filterApps = function() {
+            const sel = document.getElementById('appFilter');
+            appFilterValue = sel ? sel.value : '';
+            renderApps();
         };
 
         function renderApps() {
             const grid = document.getElementById('appsGrid');
+            const filtered = appFilterValue
+                ? apps.filter(app => app.name === appFilterValue)
+                : apps;
+
             if (apps.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-16 text-gray-400">
-                    <i class="fas fa-box-open text-6xl mb-4 opacity-30"></i>
-                    <p>No apps yet. Admin can add them.</p>
-                </div>`;
+                grid.innerHTML = '<div class="apps-empty"><p>No apps yet. Admin can add them.</p></div>';
                 return;
             }
 
-            grid.innerHTML = apps.map(app => {
-                const firstLetter = app.name.charAt(0).toUpperCase();
-                const bgColor = stringToColor(app.name);
-                const platform = app.platform || 'vercel';
-                let badgeClass = 'badge-vercel-enhanced';
-                let platformIcon = '▲';
-                let logoExtraClass = '';
-                if (platform === 'render') {
-                    badgeClass = 'badge-render-enhanced';
-                    platformIcon = '☁️';
-                    logoExtraClass = 'render';
-                } else if (platform === 'cloudflare') {
-                    badgeClass = 'badge-cloudflare-enhanced';
-                    platformIcon = '☁️';
-                    logoExtraClass = 'cloudflare';
-                }
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div class="apps-empty"><p>No application selected.</p></div>';
+                return;
+            }
 
-                // Get description from map (case-sensitive, exact match)
-                let description = descriptionMap[app.name] || '';
+            grid.innerHTML = filtered.map((app, index) => {
+                const colors = getTileColor(index);
+                const platform = (app.platform || 'vercel');
+                const displayName = formatAppName(app.name);
 
-                // Special handling for demographics app
-                if (app.name === "demographics-ten") {
-                    return `
-                        <a href="${escapeHtml(app.url)}" target="_blank" class="app-card-enhanced flex flex-col items-center text-center relative">
-                            <div class="platform-badge-enhanced ${badgeClass}">${platformIcon} ${platform}</div>
-                            <div class="demographics-logo-enhanced">
-                                <span style="font-weight: bold; font-size: 1.4em;">🌐👥 Demographics</span>
-                            </div>
-                            <h3 class="app-name">${escapeHtml(app.name)}</h3>
-                            <p class="app-description">${escapeHtml(description)}</p>
-                        </a>
-                    `;
-                } else {
-                    return `
-                        <a href="${escapeHtml(app.url)}" target="_blank" class="app-card-enhanced flex flex-col items-center text-center relative">
-                            <div class="platform-badge-enhanced ${badgeClass}">${platformIcon} ${platform}</div>
-                            <div class="app-logo-enhanced ${logoExtraClass}" style="background: ${bgColor};">${firstLetter}</div>
-                            <h3 class="app-name">${escapeHtml(app.name)}</h3>
-                            <p class="app-description">${escapeHtml(description)}</p>
-                        </a>
-                    `;
-                }
+                return `
+                    <a href="${escapeHtml(app.url)}" target="_blank" rel="noopener noreferrer"
+                       class="tile-card"
+                       style="--tile-color:${colors.main};--tile-dark:${colors.dark};"
+                       title="${escapeHtml(displayName)}">
+                        <div class="tile-body">
+                            ${getAppSvg(app.name)}
+                            <span class="tile-meta">${escapeHtml(platform)}</span>
+                        </div>
+                        <div class="tile-footer">
+                            <span class="tile-title">${escapeHtml(displayName)}</span>
+                            <span class="tile-arrow">${ARROW_SVG}</span>
+                        </div>
+                    </a>
+                `;
             }).join('');
         }
 
