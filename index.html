@@ -11,82 +11,109 @@
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: #0b0f1a; }
-        /* ---------- LOGIN PAGE ---------- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #d5dae6;
+        }
+
+        /* ---------- LOGIN PAGE (matches dashboard reference) ---------- */
         .login-page {
             min-height: 100vh;
             width: 100%;
-            background-image: url('https://i.ibb.co/PZ9PWprF/top-view-desk-concept-with-clipboard.jpg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+            background: #d5dae6;
             display: flex;
             align-items: center;
-            justify-content: flex-start;
-            padding-left: 5%;
+            justify-content: center;
+            padding: 32px 20px;
         }
-        .login-card-exact {
-            background: #1e1e2f;
-            border-radius: 32px;
-            box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5);
+
+        .login-wrap {
             width: 100%;
-            max-width: 440px;
-            padding: 2.5rem;
-            color: #e0e0e0;
+            max-width: 520px;
         }
-        .login-card-exact h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: white;
-            line-height: 1.2;
-            margin-bottom: 0.5rem;
+
+        .login-header {
+            margin-bottom: 28px;
         }
-        .login-card-exact .subtitle {
-            font-size: 1rem;
-            color: #a0a0c0;
-            margin-bottom: 2rem;
+
+        .login-card-ref {
+            background: #fff;
+            border: 1px solid #c5ccd8;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            padding: 28px 28px 32px;
         }
-        .login-card-exact .input-label {
-            font-size: 0.8rem;
+
+        .login-subtitle {
+            font-size: 15px;
+            color: #4a5568;
+            margin: 0 0 22px;
+            font-weight: 500;
+        }
+
+        .login-input-label {
+            font-size: 11px;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #b0b0c0;
-            margin-bottom: 0.5rem;
+            letter-spacing: 0.06em;
+            color: #6b7280;
+            margin-bottom: 8px;
         }
-        .login-card-exact input {
+
+        .login-input-row {
             width: 100%;
-            background: #2a2a3c;
-            border: 1px solid #3a3a4c;
-            border-radius: 12px;
-            padding: 0.75rem 1rem;
-            color: white;
-            font-size: 1rem;
-            margin-bottom: 1.5rem;
+        }
+
+        .login-input {
+            flex: 1;
+            border: 1px solid #b8c0cc;
+            border-right: none;
+            padding: 10px 14px;
+            font-size: 14px;
             outline: none;
-            transition: border 0.2s;
+            background: #fff;
+            color: #333;
+            border-radius: 3px 0 0 3px;
+            font-family: inherit;
         }
-        .login-card-exact input:focus {
-            border-color: #8b5cf6;
+
+        .login-input:focus {
+            border-color: #17a2b8;
         }
-        .login-card-exact .btn-login {
-            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
-            color: white;
-            font-weight: 600;
-            border-radius: 9999px;
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            width: 100%;
-            border: none;
-            cursor: pointer;
-            transition: opacity 0.2s;
+
+        .login-input-row .search-go-btn {
+            padding: 10px 22px;
+            font-size: 14px;
+            border-radius: 0 3px 3px 0;
         }
-        .login-card-exact .btn-login:hover {
-            opacity: 0.9;
+
+        .login-brand {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .login-error {
+            color: #e74c3c;
+            font-size: 13px;
+            margin-top: 14px;
+        }
+
+        .login-preview-strip {
+            display: flex;
+            gap: 6px;
+            margin-top: 28px;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .login-preview-strip span {
+            flex: 1;
         }
 
         /* ---------- DASHBOARD (REFERENCE TILE LAYOUT) ---------- */
@@ -321,17 +348,32 @@
 
     <!-- ========== LOGIN PAGE ========== -->
     <div id="loginContainer" class="login-page">
-        <div class="login-card-exact">
-            <h1>Welcome</h1>
-            <div class="subtitle">Please enter your name</div>
-            <form id="loginForm">
-                <div class="input-label">YOUR NAME</div>
-                <input type="text" id="usernameInput" placeholder=" " required>
-                <button type="submit" class="btn-login">
-                    <i class="fas fa-lock"></i> Access
-                </button>
-            </form>
-            <div id="loginError" class="text-red-500 text-sm mt-4 hidden"></div>
+        <div class="login-wrap">
+            <div class="login-header">
+                <div class="dashboard-badge">Welcome</div>
+            </div>
+            <div class="login-card-ref">
+                <p class="login-subtitle">Please enter your name to access applications</p>
+                <form id="loginForm">
+                    <div class="login-input-label">Your Name</div>
+                    <div class="filter-box login-input-row">
+                        <input type="text" id="usernameInput" class="login-input" placeholder="Enter your name" required autocomplete="name">
+                        <button type="submit" class="search-go-btn">Go</button>
+                    </div>
+                </form>
+                <div id="loginError" class="login-error hidden"></div>
+            </div>
+            <p class="login-brand">Alpha Konnect · Internal Hub</p>
+            <div class="login-preview-strip" aria-hidden="true">
+                <span style="background:#4a90d9"></span>
+                <span style="background:#5cb85c"></span>
+                <span style="background:#e74c3c"></span>
+                <span style="background:#9b59b6"></span>
+                <span style="background:#f0ad4e"></span>
+                <span style="background:#5bc0de"></span>
+                <span style="background:#34495e"></span>
+                <span style="background:#af7ac5"></span>
+            </div>
         </div>
     </div>
 
