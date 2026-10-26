@@ -1,0 +1,10 @@
+{
+  "name": "system",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Alpha Konnect internal hub — static frontend + Vercel API layer backed by Neon Postgres",
+  "dependencies": {
+    "@neondatabase/serverless": "^1.2.0"
+  }
+}

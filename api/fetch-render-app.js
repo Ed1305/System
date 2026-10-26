@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     // Call Render API to get service details
     // Render API endpoint: GET https://api.render.com/v1/services
     // We need to search by name (or have the service ID)
-    const apiKey = process.env.RENDER_API_KEY;
+    const apiKey = (req.body && req.body.apiKey) || process.env.RENDER_API_KEY;
     if (!apiKey) {
         return res.status(500).json({ error: 'Render API key not configured' });
     }
