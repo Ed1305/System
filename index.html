@@ -8,8 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Supabase JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body {
             font-family: 'Segoe UI', SegoeUI, Tahoma, Geneva, Verdana, sans-serif;
@@ -668,10 +666,20 @@
     </div>
 
     <script>
-        // ========== SUPABASE CONFIG ==========
-        const SUPABASE_URL = 'https://fvicrbnpxrjlurcubwwo.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2aWNyYm5weHJqbHVyY3Vid3dvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0ODMyMDksImV4cCI6MjA4NzA1OTIwOX0.5Vb2c1qUjDPlMSKuh_7_J0gUEpm3O36EhuuHagc4x_I';
-        const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // ========== VERCEL API HELPER ==========
+        // The dashboard now talks to the small Vercel API layer
+        // (api/*.js) backed by Neon Postgres, instead of Supabase.
+        async function api(path, options = {}) {
+            const res = await fetch(path, {
+                headers: { 'Content-Type': 'application/json' },
+                ...options
+            });
+            const data = await res.json().catch(() => null);
+            if (!res.ok) {
+                throw new Error((data && data.error) || ('Request failed (' + res.status + ')'));
+            }
+            return data;
+        }
 
         // ========== GLOBAL DATA ==========
         let apps = [];
@@ -692,10 +700,11 @@
             document.getElementById('dashboardContainer').classList.remove('hidden');
             sessionStorage.setItem('alphaUser', username);
 
+            startAppPolling();
             try {
                 await addActivity('User login', `User "${username}" logged in`);
             } catch (err) {
-                console.warn('Activity log failed (maybe tables missing?)', err);
+                console.warn('Activity log failed', err);
             }
         });
 
@@ -707,44 +716,33 @@
                 updateUserProfile(savedUser);
                 document.getElementById('loginContainer').classList.add('hidden');
                 document.getElementById('dashboardContainer').classList.remove('hidden');
+                startAppPolling();
             }
         })();
 
-        // ========== REAL-TIME SUBSCRIPTIONS ==========
-        sbClient
-            .channel('apps-channel')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'apps' }, () => {
-                fetchApps();
-            })
-            .subscribe();
-
-        let activitiesChannel = null;
-        function subscribeToActivities() {
-            if (activitiesChannel) sbClient.removeChannel(activitiesChannel);
-            activitiesChannel = sbClient
-                .channel('activities-channel')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'activities' }, () => {
-                    if (adminAuthenticated) fetchActivities();
-                })
-                .subscribe();
+        // ========== APP POLLER (replaces Supabase realtime) ==========
+        let appPollTimer = null;
+        function startAppPolling() {
+            stopAppPolling();
+            fetchApps();
+            appPollTimer = setInterval(fetchApps, 15000);
+        }
+        function stopAppPolling() {
+            if (appPollTimer) { clearInterval(appPollTimer); appPollTimer = null; }
         }
 
         // Initial fetch
         fetchApps();
 
         async function fetchApps() {
-            const { data, error } = await sbClient
-                .from('apps')
-                .select('*')
-                .order('addedAt', { ascending: false });
-            if (error) {
-                console.error('Error fetching apps:', error);
-                document.getElementById('appsGrid').innerHTML = '<div class="apps-empty"><p>Could not load apps. Make sure the apps table exists.</p></div>';
-            } else {
-                apps = data;
+            try {
+                apps = await api('/api/apps');
                 populateAppFilter();
                 renderMostUsed();
                 renderApps();
+            } catch (error) {
+                console.error('Error fetching apps:', error);
+                document.getElementById('appsGrid').innerHTML = '<div class="apps-empty"><p>Could not load apps. Check that the database is connected.</p></div>';
             }
         }
 
@@ -758,15 +756,11 @@
         }
 
         async function fetchActivities() {
-            const { data, error } = await sbClient
-                .from('activities')
-                .select('*')
-                .order('timestamp', { ascending: false })
-                .limit(50);
-            if (error) console.error('Error fetching activities:', error);
-            else {
-                activities = data;
+            try {
+                activities = await api('/api/activities');
                 if (adminAuthenticated) renderActivities();
+            } catch (error) {
+                console.error('Error fetching activities:', error);
             }
         }
 
@@ -818,7 +812,6 @@
                 document.getElementById('adminPanel').classList.remove('hidden');
                 document.getElementById('lockBtn').innerHTML = '<i class="fas fa-unlock" style="color:#00bcf2"></i>';
                 closeAdminModal();
-                subscribeToActivities();
                 fetchActivities();
                 loadRenderApiKey();
             } else {
@@ -830,11 +823,8 @@
             adminAuthenticated = false;
             document.getElementById('adminPanel').classList.add('hidden');
             document.getElementById('lockBtn').innerHTML = '<i class="fas fa-cog"></i>';
-            addActivity('Admin logout', 'Logged out');
-            if (activitiesChannel) {
-                sbClient.removeChannel(activitiesChannel);
-                activitiesChannel = null;
-            }
+                addActivity('Admin logout', 'Logged out');
+            stopAppPolling();
         };
 
         // ========== RENDER API KEY FUNCTIONS ==========
@@ -846,25 +836,25 @@
             const key = document.getElementById('renderApiKey').value.trim();
             if (!key) return;
 
-            const { error } = await sbClient
-                .from('settings')
-                .update({ render_api_key: key, updated_at: new Date().toISOString() })
-                .eq('id', 1);
-            if (error) {
-                alert('Error saving key: ' + error.message);
-            } else {
+            try {
+                await api('/api/settings', {
+                    method: 'PATCH',
+                    body: JSON.stringify({ render_api_key: key })
+                });
                 alert('Render API key saved!');
+            } catch (err) {
+                alert('Error saving key: ' + err.message);
             }
         }
 
         async function loadRenderApiKey() {
-            const { data, error } = await sbClient
-                .from('settings')
-                .select('render_api_key')
-                .eq('id', 1)
-                .single();
-            if (!error && data && data.render_api_key) {
-                document.getElementById('renderApiKey').value = data.render_api_key;
+            try {
+                const data = await api('/api/settings');
+                if (data && data.render_api_key) {
+                    document.getElementById('renderApiKey').value = data.render_api_key;
+                }
+            } catch (err) {
+                console.warn('Could not load settings:', err);
             }
         }
 
@@ -888,12 +878,10 @@
                 let hostname = url.replace('https://', '').replace('http://', '').split('/')[0];
                 name = hostname.split('.')[0];
                 name = name.charAt(0).toUpperCase() + name.slice(1);
-                appData = { name, url, platform, addedAt: new Date().toISOString() };
-                const { error } = await sbClient.from('apps').insert([appData]);
-                if (error) {
-                    alert('Error adding app: ' + error.message);
-                    return;
-                }
+                await api('/api/apps', {
+                    method: 'POST',
+                    body: JSON.stringify({ name, url, platform })
+                });
                 addActivity('App added', `"${name}" (${platform}) from ${url}`);
                 document.getElementById('appUrl').value = '';
             } else if (platform === 'render') {
@@ -915,10 +903,10 @@
                     }
                     const data = await response.json();
                     name = data.name;
-                    appData = { name, url, platform, addedAt: new Date().toISOString() };
-
-                    const { error } = await sbClient.from('apps').insert([appData]);
-                    if (error) throw error;
+                    await api('/api/apps', {
+                        method: 'POST',
+                        body: JSON.stringify({ name, url, platform })
+                    });
                     addActivity('App added', `"${name}" (${platform}) from ${url}`);
                     document.getElementById('appUrl').value = '';
                 } catch (err) {
@@ -1106,10 +1094,10 @@
 
         // ========== ADD ACTIVITY ==========
         async function addActivity(action, details) {
-            const { error } = await sbClient.from('activities').insert([
-                { action, details, timestamp: new Date().toISOString() }
-            ]);
-            if (error) throw error;
+            await api('/api/activities', {
+                method: 'POST',
+                body: JSON.stringify({ action, details })
+            });
         }
 
         // ========== CLOSE MODAL ON OUTSIDE CLICK ==========
