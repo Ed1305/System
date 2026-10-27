@@ -673,7 +673,7 @@
                             class="w-full p-2 rounded-lg bg-gray-700/80 border border-gray-600 text-white placeholder:text-gray-400 mb-2 focus:outline-none focus:ring-1 focus:ring-purple-500">
                         <label class="block text-xs text-gray-400 mb-1">Icon <span class="text-gray-500">(optional — auto-detected if not chosen)</span></label>
                         <div id="iconPicker" class="icon-grid"></div>
-                        <button onclick="addAppFromPlatform()" class="gradient-btn w-full justify-center py-2 mt-2">
+                        <button id="addAppBtn" onclick="addAppFromPlatform()" class="gradient-btn w-full justify-center py-2 mt-2">
                             <i class="fas fa-magic"></i> Fetch & Add
                         </button>
                     </div>
@@ -951,6 +951,8 @@
                     name = name.charAt(0).toUpperCase() + name.slice(1);
                 }
                 const icon = selectedIcon || iconKeyForName(name);
+                const addBtn = document.getElementById('addAppBtn');
+                if (addBtn) addBtn.disabled = true;
                 try {
                     await api('/api/apps', {
                         method: 'POST',
@@ -961,8 +963,11 @@
                     document.getElementById('appName').value = '';
                     resetIconPicker();
                     await fetchApps();   // refresh tiles immediately
+                    alert('App added successfully!');
                 } catch (err) {
                     alert('Error adding app: ' + err.message);
+                } finally {
+                    if (addBtn) addBtn.disabled = false;
                 }
             } else if (platform === 'render') {
                 const apiKey = document.getElementById('renderApiKey').value.trim();
@@ -971,6 +976,8 @@
                     return;
                 }
 
+                const addBtn = document.getElementById('addAppBtn');
+                if (addBtn) addBtn.disabled = true;
                 try {
                     const response = await fetch('/api/fetch-render-app', {
                         method: 'POST',
@@ -993,8 +1000,11 @@
                     document.getElementById('appName').value = '';
                     resetIconPicker();
                     await fetchApps();   // refresh tiles immediately
+                    alert('App added successfully!');
                 } catch (err) {
                     alert('Error adding Render app: ' + err.message);
+                } finally {
+                    if (addBtn) addBtn.disabled = false;
                 }
             }
         };
@@ -1111,6 +1121,10 @@
             selectedIcon = '';
             renderIconPicker();
         }
+
+        // Populate the icon picker as soon as the script runs (the panel
+        // itself stays hidden until the admin unlocks it).
+        renderIconPicker();
 
         // ========== MANAGE EXISTING APPS ==========
         async function loadManageApps() {
