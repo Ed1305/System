@@ -14,6 +14,9 @@ Vercel API endpoints (`api/*.js`) backed by a Neon Postgres database.
 - In the Neon dashboard: **SQL Editor** → paste the contents of
   [`schema.sql`](./schema.sql) → **Run**.
 - This creates `apps`, `activities`, `settings` and seeds the settings row.
+- If your database already exists, run `schema.sql` again — it is
+  idempotent and will add the new `icon` column used by the app icon
+  picker.
 
 ## 3. Get the connection string
 
