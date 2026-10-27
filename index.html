@@ -664,7 +664,12 @@
                                 <option value="cloudflare">Cloudflare Workers</option>
                             </select>
                         </div>
-                        <input type="url" id="appUrl" placeholder="https://your-app.vercel.app / .onrender.com / .workers.dev" 
+                        <div class="mb-2">
+                            <label class="block text-xs text-gray-400 mb-1">App name <span class="text-gray-500">(optional — auto-detected from the site)</span></label>
+                            <input type="text" id="appName" placeholder="e.g. Tenure Dashboard"
+                                class="w-full p-2 rounded-lg bg-gray-700/80 border border-gray-600 text-white placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-purple-500">
+                        </div>
+                        <input type="url" id="appUrl" placeholder="https://your-app.vercel.app / .onrender.com / .workers.dev"
                             class="w-full p-2 rounded-lg bg-gray-700/80 border border-gray-600 text-white placeholder:text-gray-400 mb-2 focus:outline-none focus:ring-1 focus:ring-purple-500">
                         <label class="block text-xs text-gray-400 mb-1">Icon <span class="text-gray-500">(optional — auto-detected if not chosen)</span></label>
                         <div id="iconPicker" class="icon-grid"></div>
@@ -678,6 +683,14 @@
                         <div id="activityLog" class="space-y-2 max-h-48 overflow-y-auto pr-2 text-sm text-gray-300">
                             <!-- JS will fill -->
                         </div>
+                    </div>
+                </div>
+
+                <!-- Manage apps -->
+                <div class="bg-gray-800/60 backdrop-blur-sm rounded-xl p-4 border border-gray-700 mt-4">
+                    <h3 class="font-medium mb-3 flex items-center gap-2 text-gray-300"><i class="fas fa-list text-purple-400"></i> Your apps <span class="text-xs text-gray-500">— edit names and links</span></h3>
+                    <div id="manageAppsList" class="space-y-2 max-h-72 overflow-y-auto">
+                        <!-- JS will fill -->
                     </div>
                 </div>
             </div>
@@ -784,6 +797,7 @@
                 populateAppFilter();
                 renderMostUsed();
                 renderApps();
+                if (adminAuthenticated) loadManageApps();
             } catch (error) {
                 console.error('Error fetching apps:', error);
                 document.getElementById('appsGrid').innerHTML = '<div class="apps-empty"><p>Could not load apps. Check that the database is connected.</p></div>';
@@ -858,6 +872,7 @@
                 closeAdminModal();
                 fetchActivities();
                 loadRenderApiKey();
+                fetchApps();
             } else {
                 document.getElementById('adminError').classList.remove('hidden');
             }
@@ -914,13 +929,27 @@
                 alert('Please enter a URL');
                 return;
             }
-
-            let name = '';
+            let name = document.getElementById('appName').value.trim();
 
             if (platform === 'vercel' || platform === 'cloudflare') {
-                let hostname = url.replace('https://', '').replace('http://', '').split('/')[0];
-                name = hostname.split('.')[0];
-                name = name.charAt(0).toUpperCase() + name.slice(1);
+                // Use the typed name if given, otherwise fetch the real
+                // app name from the site, otherwise fall back to the URL
+                if (!name) {
+                    try {
+                        const info = await api('/api/fetch-app-name', {
+                            method: 'POST',
+                            body: JSON.stringify({ url })
+                        });
+                        name = info.name;
+                    } catch (err) {
+                        console.warn('Could not fetch app name, deriving from URL:', err);
+                    }
+                }
+                if (!name) {
+                    let hostname = url.replace('https://', '').replace('http://', '').split('/')[0];
+                    name = hostname.split('.')[0];
+                    name = name.charAt(0).toUpperCase() + name.slice(1);
+                }
                 const icon = selectedIcon || iconKeyForName(name);
                 await api('/api/apps', {
                     method: 'POST',
@@ -928,6 +957,7 @@
                 });
                 addActivity('App added', `"${name}" (${platform}) from ${url}`);
                 document.getElementById('appUrl').value = '';
+                document.getElementById('appName').value = '';
                 resetIconPicker();
             } else if (platform === 'render') {
                 const apiKey = document.getElementById('renderApiKey').value.trim();
@@ -947,7 +977,7 @@
                         throw new Error(err.error || 'Failed to fetch from Render');
                     }
                     const data = await response.json();
-                    name = data.name;
+                    name = name || data.name;
                     const icon = selectedIcon || iconKeyForName(name);
                     await api('/api/apps', {
                         method: 'POST',
@@ -955,6 +985,7 @@
                     });
                     addActivity('App added', `"${name}" (${platform}) from ${url}`);
                     document.getElementById('appUrl').value = '';
+                    document.getElementById('appName').value = '';
                     resetIconPicker();
                 } catch (err) {
                     alert('Error adding Render app: ' + err.message);
@@ -1074,6 +1105,57 @@
             selectedIcon = '';
             renderIconPicker();
         }
+
+        // ========== MANAGE EXISTING APPS ==========
+        async function loadManageApps() {
+            const wrap = document.getElementById('manageAppsList');
+            if (!wrap || !adminAuthenticated) return;
+            if (apps.length === 0) {
+                wrap.innerHTML = '<p class="text-gray-500 text-sm">No apps yet.</p>';
+                return;
+            }
+            wrap.innerHTML = apps.map(app => `
+                <div class="flex items-center gap-2 bg-gray-700/50 rounded-lg p-2" data-app-id="${app.id}">
+                    <span class="start-nav-icon" style="width:32px;height:32px">${renderAppIcon(app)}</span>
+                    <input type="text" class="app-name-input flex-1 min-w-0 p-1 rounded bg-gray-700 border border-gray-600 text-white text-sm" value="${escapeHtml(app.name)}">
+                    <input type="url" class="app-url-input flex-1 min-w-0 p-1 rounded bg-gray-700 border border-gray-600 text-white text-xs" value="${escapeHtml(app.url)}">
+                    <button class="save-app-btn px-2 py-1 rounded bg-purple-600 text-white text-xs" onclick="saveAppRow(${app.id})">Save</button>
+                    <button class="remove-app-btn px-2 py-1 rounded bg-red-600 text-white text-xs" onclick="removeAppRow(${app.id})">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        window.saveAppRow = async function(id) {
+            const row = document.querySelector('[data-app-id="' + id + '"]');
+            if (!row) return;
+            const name = row.querySelector('.app-name-input').value.trim();
+            const url = row.querySelector('.app-url-input').value.trim();
+            if (!name || !url) {
+                alert('Name and URL are required');
+                return;
+            }
+            try {
+                await api('/api/apps/' + id, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ name, url })
+                });
+                addActivity('App updated', `"${name}" updated`);
+                await fetchApps();
+            } catch (err) {
+                alert('Error updating app: ' + err.message);
+            }
+        };
+
+        window.removeAppRow = async function(id) {
+            if (!confirm('Remove this app?')) return;
+            try {
+                await api('/api/apps/' + id, { method: 'DELETE' });
+                addActivity('App removed', 'App removed');
+                await fetchApps();
+            } catch (err) {
+                alert('Error removing app: ' + err.message);
+            }
+        };
 
         let appFilterValue = '';
 
