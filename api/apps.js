@@ -6,12 +6,20 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
         // Older databases may not have the icon column yet — fall back
         // to a null so the list still works.
-        const iconCol = await hasIconColumn() ? ', icon' : ', null as icon';
-        const apps = await sql()(`
-            select id, name, url, platform, "addedAt"${iconCol}
-            from public.apps
-            order by "addedAt" desc
-        `);
+        let apps;
+        if (await hasIconColumn()) {
+            apps = await sql()`
+                select id, name, url, platform, "addedAt", icon
+                from public.apps
+                order by "addedAt" desc
+            `;
+        } else {
+            apps = await sql()`
+                select id, name, url, platform, "addedAt", null as icon
+                from public.apps
+                order by "addedAt" desc
+            `;
+        }
         return res.status(200).json(apps);
     }
 
