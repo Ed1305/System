@@ -800,7 +800,7 @@
                 if (adminAuthenticated) loadManageApps();
             } catch (error) {
                 console.error('Error fetching apps:', error);
-                document.getElementById('appsGrid').innerHTML = '<div class="apps-empty"><p>Could not load apps. Check that the database is connected.</p></div>';
+                document.getElementById('appsGrid').innerHTML = '<div class="apps-empty"><p>Could not load apps: ' + escapeHtml(error.message) + '</p></div>';
             }
         }
 
