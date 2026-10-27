@@ -25,6 +25,9 @@ create table if not exists public.apps (
                                                  -- and insert payload
 );
 
+-- Existing databases: add the icon column if it's missing
+alter table public.apps add column if not exists icon text;
+
 -- ---------- activities (user/admin activity log) ----------
 create table if not exists public.activities (
     id         bigserial primary key,

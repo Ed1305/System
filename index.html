@@ -507,6 +507,48 @@
             flex-shrink: 0;
         }
 
+        /* Smaller icons inside the start-nav list */
+        .start-nav-icon .tile-svg {
+            width: 22px;
+            height: 22px;
+            stroke-width: 2;
+        }
+
+        /* Icon picker (add-app section) */
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 8px;
+            max-height: 150px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+        .icon-choice {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 50px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            cursor: pointer;
+            padding: 0;
+            transition: background 0.15s ease, border-color 0.15s ease;
+        }
+        .icon-choice:hover {
+            background: rgba(255, 255, 255, 0.14);
+        }
+        .icon-choice--active {
+            background: rgba(168, 85, 247, 0.3);
+            border-color: #a855f7;
+            box-shadow: 0 0 0 1px #a855f7;
+        }
+        .icon-choice .tile-svg {
+            width: 26px;
+            height: 26px;
+            stroke-width: 2;
+        }
+
         .gradient-btn {
             background: linear-gradient(135deg, #eb4747, #f44f4f);
             color: #1f2937;
@@ -622,9 +664,16 @@
                                 <option value="cloudflare">Cloudflare Workers</option>
                             </select>
                         </div>
-                        <input type="url" id="appUrl" placeholder="https://your-app.vercel.app / .onrender.com / .workers.dev" 
+                        <div class="mb-2">
+                            <label class="block text-xs text-gray-400 mb-1">App name <span class="text-gray-500">(optional — auto-detected from the site)</span></label>
+                            <input type="text" id="appName" placeholder="e.g. Tenure Dashboard"
+                                class="w-full p-2 rounded-lg bg-gray-700/80 border border-gray-600 text-white placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-purple-500">
+                        </div>
+                        <input type="url" id="appUrl" placeholder="https://your-app.vercel.app / .onrender.com / .workers.dev"
                             class="w-full p-2 rounded-lg bg-gray-700/80 border border-gray-600 text-white placeholder:text-gray-400 mb-2 focus:outline-none focus:ring-1 focus:ring-purple-500">
-                        <button onclick="addAppFromPlatform()" class="gradient-btn w-full justify-center py-2">
+                        <label class="block text-xs text-gray-400 mb-1">Icon <span class="text-gray-500">(optional — auto-detected if not chosen)</span></label>
+                        <div id="iconPicker" class="icon-grid"></div>
+                        <button onclick="addAppFromPlatform()" class="gradient-btn w-full justify-center py-2 mt-2">
                             <i class="fas fa-magic"></i> Fetch & Add
                         </button>
                     </div>
@@ -634,6 +683,14 @@
                         <div id="activityLog" class="space-y-2 max-h-48 overflow-y-auto pr-2 text-sm text-gray-300">
                             <!-- JS will fill -->
                         </div>
+                    </div>
+                </div>
+
+                <!-- Manage apps -->
+                <div class="bg-gray-800/60 backdrop-blur-sm rounded-xl p-4 border border-gray-700 mt-4">
+                    <h3 class="font-medium mb-3 flex items-center gap-2 text-gray-300"><i class="fas fa-list text-purple-400"></i> Your apps <span class="text-xs text-gray-500">— edit names and links</span></h3>
+                    <div id="manageAppsList" class="space-y-2 max-h-72 overflow-y-auto">
+                        <!-- JS will fill -->
                     </div>
                 </div>
             </div>
@@ -740,6 +797,7 @@
                 populateAppFilter();
                 renderMostUsed();
                 renderApps();
+                if (adminAuthenticated) loadManageApps();
             } catch (error) {
                 console.error('Error fetching apps:', error);
                 document.getElementById('appsGrid').innerHTML = '<div class="apps-empty"><p>Could not load apps. Check that the database is connected.</p></div>';
@@ -814,6 +872,7 @@
                 closeAdminModal();
                 fetchActivities();
                 loadRenderApiKey();
+                fetchApps();
             } else {
                 document.getElementById('adminError').classList.remove('hidden');
             }
@@ -870,20 +929,36 @@
                 alert('Please enter a URL');
                 return;
             }
-
-            let name = '';
-            let appData = {};
+            let name = document.getElementById('appName').value.trim();
 
             if (platform === 'vercel' || platform === 'cloudflare') {
-                let hostname = url.replace('https://', '').replace('http://', '').split('/')[0];
-                name = hostname.split('.')[0];
-                name = name.charAt(0).toUpperCase() + name.slice(1);
+                // Use the typed name if given, otherwise fetch the real
+                // app name from the site, otherwise fall back to the URL
+                if (!name) {
+                    try {
+                        const info = await api('/api/fetch-app-name', {
+                            method: 'POST',
+                            body: JSON.stringify({ url })
+                        });
+                        name = info.name;
+                    } catch (err) {
+                        console.warn('Could not fetch app name, deriving from URL:', err);
+                    }
+                }
+                if (!name) {
+                    let hostname = url.replace('https://', '').replace('http://', '').split('/')[0];
+                    name = hostname.split('.')[0];
+                    name = name.charAt(0).toUpperCase() + name.slice(1);
+                }
+                const icon = selectedIcon || iconKeyForName(name);
                 await api('/api/apps', {
                     method: 'POST',
-                    body: JSON.stringify({ name, url, platform })
+                    body: JSON.stringify({ name, url, platform, icon })
                 });
                 addActivity('App added', `"${name}" (${platform}) from ${url}`);
                 document.getElementById('appUrl').value = '';
+                document.getElementById('appName').value = '';
+                resetIconPicker();
             } else if (platform === 'render') {
                 const apiKey = document.getElementById('renderApiKey').value.trim();
                 if (!apiKey) {
@@ -902,13 +977,16 @@
                         throw new Error(err.error || 'Failed to fetch from Render');
                     }
                     const data = await response.json();
-                    name = data.name;
+                    name = name || data.name;
+                    const icon = selectedIcon || iconKeyForName(name);
                     await api('/api/apps', {
                         method: 'POST',
-                        body: JSON.stringify({ name, url, platform })
+                        body: JSON.stringify({ name, url, platform, icon })
                     });
                     addActivity('App added', `"${name}" (${platform}) from ${url}`);
                     document.getElementById('appUrl').value = '';
+                    document.getElementById('appName').value = '';
+                    resetIconPicker();
                 } catch (err) {
                     alert('Error adding Render app: ' + err.message);
                 }
@@ -935,7 +1013,148 @@
             mic: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><rect x="18" y="8" width="12" height="20" rx="6"/><path d="M12 24a12 12 0 0024 0M24 36v6"/></svg>',
             gears: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><circle cx="24" cy="24" r="6"/><path d="M24 8v4M24 36v4M8 24h4M36 24h4M13 13l3 3M32 32l3 3M13 35l3-3M32 16l3-3"/></svg>',
             folder: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><path d="M6 14h14l4 4h18v22H6z"/></svg>',
-            grid: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><rect x="8" y="8" width="12" height="12"/><rect x="28" y="8" width="12" height="12"/><rect x="8" y="28" width="12" height="12"/><rect x="28" y="28" width="12" height="12"/></svg>'
+            grid: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><rect x="8" y="8" width="12" height="12"/><rect x="28" y="8" width="12" height="12"/><rect x="8" y="28" width="12" height="12"/><rect x="28" y="28" width="12" height="12"/></svg>',
+            cloud: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><path d="M16 34a10 10 0 01-1-19.9A13 13 0 0142 17a9.5 9.5 0 01-1 17H16z"/></svg>',
+            code: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><path d="M18 16l-8 8 8 8M30 16l8 8-8 8M25 12l-2 24"/></svg>',
+            mail: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><rect x="6" y="12" width="36" height="24" rx="2"/><path d="M6 16l18 13 18-13"/></svg>',
+            calendar: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><rect x="8" y="10" width="32" height="30" rx="2"/><path d="M8 18h32M16 6v8M32 6v8M16 24h4M24 24h4M32 24h4M16 32h4M24 32h4"/></svg>',
+            shield: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><path d="M24 6l14 5v12c0 9-6 15-14 19-8-4-14-10-14-19V11l14-5z"/><path d="M18 24l5 5 9-9"/></svg>',
+            rocket: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><path d="M24 10c4 3 6 8 6 14l-2 5H20l-2-5c0-6 2-11 6-14z"/><circle cx="24" cy="20" r="2"/><path d="M18 27l-6 7M30 27l6 7M24 36v6"/></svg>',
+            star: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><path d="M24 8l5 11 12 1-8.5 8 2 12-10.5-6-10.5 6 2-12L7 20l12-1z"/></svg>',
+            clock: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><circle cx="24" cy="24" r="16"/><path d="M24 14v10l7 4"/></svg>',
+            database: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><ellipse cx="24" cy="14" rx="14" ry="6"/><path d="M10 14v8c0 3.3 6.3 6 14 6s14-2.7 14-6v-8"/><path d="M10 22v8c0 3.3 6.3 6 14 6s14-2.7 14-6v-8"/></svg>',
+            globe: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><circle cx="24" cy="24" r="16"/><path d="M8 24h32"/><path d="M24 8c4 4 4 28 0 32M24 8c-4 4-4 28 0 32"/></svg>',
+            lock: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><rect x="12" y="22" width="24" height="18" rx="2"/><path d="M18 22v-5a6 6 0 0112 0v5"/></svg>',
+            heart: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><path d="M24 40S8 30 8 19a8 8 0 0116-3 8 8 0 0116 3c0 11-16 21-16 21z"/></svg>',
+            bell: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><path d="M24 10a12 12 0 0112 12v6l3 5H9l3-5v-6a12 12 0 0112-12z"/><path d="M20 38a4 4 0 008 0"/></svg>',
+            wallet: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><rect x="8" y="14" width="32" height="22" rx="3"/><path d="M8 22h32"/><circle cx="32" cy="29" r="2"/></svg>',
+            cpu: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><rect x="14" y="14" width="20" height="20" rx="2"/><rect x="20" y="20" width="8" height="8" rx="1"/><path d="M20 14v-4M28 14v-4M20 34v4M28 34v4M14 20h-4M14 28h-4M34 20h4M34 28h4"/></svg>',
+            briefcase: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><rect x="8" y="14" width="32" height="24" rx="3"/><path d="M18 14v-4h12v4"/><path d="M8 24h32"/></svg>',
+            book: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><path d="M10 10h16v28H10z"/><path d="M26 10h12v28H26"/><path d="M14 16h6M14 22h6"/></svg>',
+            ticket: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><path d="M8 16h32v6a4 4 0 000 8v6H8v-6a4 4 0 000-8z"/><path d="M24 16v24"/></svg>',
+            inbox: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><path d="M8 24l8-12h16l8 12v14H8z"/><path d="M8 24h12l4 6h4l4-6h12"/></svg>',
+            chat: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><path d="M8 10h32v18H22L10 38V28H8z"/><path d="M14 20h4M22 20h4"/></svg>',
+            flag: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><path d="M10 8h28l-6 8 6 8H10z"/><path d="M10 8v24"/></svg>',
+            sun: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><circle cx="24" cy="24" r="9"/><path d="M24 6v6M24 36v6M6 24h6M36 24h6M12 12l4 4M32 32l4 4M12 36l4-4M32 16l4-4"/></svg>',
+            pie: '<svg class="tile-svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2"><circle cx="24" cy="24" r="16"/><path d="M24 24v16h16"/><path d="M24 8a16 16 0 0116 16"/></svg>'
+        };
+
+        // All icons shown in the add-app icon picker
+        const ALL_ICONS = [
+            'users', 'attrition', 'tenure', 'userplus', 'headset', 'mic',
+            'chart', 'coins', 'wallet', 'clock', 'star', 'heart',
+            'laptop', 'cloud', 'database', 'globe', 'cpu', 'code',
+            'clipboard', 'briefcase', 'folder', 'grid', 'book', 'ticket',
+            'inbox', 'mail', 'chat', 'bell', 'calendar', 'flag',
+            'shield', 'lock', 'rocket', 'phone', 'pie', 'sun',
+            'gears'
+        ];
+
+        // Auto-detect an icon key from an app name (used when the admin
+        // does not pick one)
+        function iconKeyForName(name) {
+            const n = (name || '').toLowerCase();
+            if (n.includes('demographic')) return 'users';
+            if (n.includes('attrition')) return 'attrition';
+            if (n.includes('tenure')) return 'tenure';
+            if (n.includes('dispo')) return 'phone';
+            if (n.includes('asset')) return 'laptop';
+            if (n.includes('interview')) return 'clipboard';
+            if (n.includes('bonus')) return 'coins';
+            if (n.includes('performance') || n.includes('tracker')) return 'chart';
+            if (n.includes('agent')) return 'headset';
+            if (n.includes('rehired')) return 'userplus';
+            if (n.includes('call') || n.includes('audit')) return 'mic';
+            if (n.includes('setting') || n.includes('dialops') || n.includes('ops portal')) return 'gears';
+            if (n.includes('headset')) return 'headset';
+            return 'folder';
+        }
+
+        // Icon HTML for a tile: explicit icon key wins, else auto-detect,
+        // else an emoji stored in the icon column is rendered as text
+        function renderAppIcon(app) {
+            if (app.icon && TILE_SVGS[app.icon]) return TILE_SVGS[app.icon];
+            if (app.icon) return '<span style="font-size:34px;line-height:1">' + escapeHtml(app.icon) + '</span>';
+            return TILE_SVGS[iconKeyForName(app.name)];
+        }
+
+        function getAppSvg(name) {
+            return TILE_SVGS[iconKeyForName(name)];
+        }
+
+        // ========== ICON PICKER (used when adding an app) ==========
+        let selectedIcon = '';
+
+        function renderIconPicker() {
+            const wrap = document.getElementById('iconPicker');
+            if (!wrap) return;
+            wrap.innerHTML = ALL_ICONS.map(key => `
+                <button type="button" class="icon-choice${selectedIcon === key ? ' icon-choice--active' : ''}"
+                        onclick="selectIcon('${key}')" title="${key}">
+                    ${TILE_SVGS[key]}
+                </button>
+            `).join('');
+        }
+
+        window.selectIcon = function(key) {
+            selectedIcon = key;
+            renderIconPicker();
+        };
+
+        function resetIconPicker() {
+            selectedIcon = '';
+            renderIconPicker();
+        }
+
+        // ========== MANAGE EXISTING APPS ==========
+        async function loadManageApps() {
+            const wrap = document.getElementById('manageAppsList');
+            if (!wrap || !adminAuthenticated) return;
+            if (apps.length === 0) {
+                wrap.innerHTML = '<p class="text-gray-500 text-sm">No apps yet.</p>';
+                return;
+            }
+            wrap.innerHTML = apps.map(app => `
+                <div class="flex items-center gap-2 bg-gray-700/50 rounded-lg p-2" data-app-id="${app.id}">
+                    <span class="start-nav-icon" style="width:32px;height:32px">${renderAppIcon(app)}</span>
+                    <input type="text" class="app-name-input flex-1 min-w-0 p-1 rounded bg-gray-700 border border-gray-600 text-white text-sm" value="${escapeHtml(app.name)}">
+                    <input type="url" class="app-url-input flex-1 min-w-0 p-1 rounded bg-gray-700 border border-gray-600 text-white text-xs" value="${escapeHtml(app.url)}">
+                    <button class="save-app-btn px-2 py-1 rounded bg-purple-600 text-white text-xs" onclick="saveAppRow(${app.id})">Save</button>
+                    <button class="remove-app-btn px-2 py-1 rounded bg-red-600 text-white text-xs" onclick="removeAppRow(${app.id})">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        window.saveAppRow = async function(id) {
+            const row = document.querySelector('[data-app-id="' + id + '"]');
+            if (!row) return;
+            const name = row.querySelector('.app-name-input').value.trim();
+            const url = row.querySelector('.app-url-input').value.trim();
+            if (!name || !url) {
+                alert('Name and URL are required');
+                return;
+            }
+            try {
+                await api('/api/apps/' + id, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ name, url })
+                });
+                addActivity('App updated', `"${name}" updated`);
+                await fetchApps();
+            } catch (err) {
+                alert('Error updating app: ' + err.message);
+            }
+        };
+
+        window.removeAppRow = async function(id) {
+            if (!confirm('Remove this app?')) return;
+            try {
+                await api('/api/apps/' + id, { method: 'DELETE' });
+                addActivity('App removed', 'App removed');
+                await fetchApps();
+            } catch (err) {
+                alert('Error removing app: ' + err.message);
+            }
         };
 
         let appFilterValue = '';
@@ -1011,7 +1230,7 @@
                 const label = formatAppName(app.name);
                 return `
                     <a class="start-nav-item" href="${escapeHtml(app.url)}" target="_blank" rel="noopener noreferrer">
-                        <span class="start-nav-icon" style="background:${color}"><i class="fas fa-window-maximize" style="font-size:11px"></i></span>
+                        <span class="start-nav-icon" style="background:${color}">${renderAppIcon(app)}</span>
                         <span>${escapeHtml(label)}</span>
                         <i class="fas fa-chevron-right"></i>
                     </a>
@@ -1041,22 +1260,23 @@
                 return;
             }
 
-            const showAll = !appFilterValue && filtered.length > 1;
-            grid.innerHTML = filtered.map((app, index) => {
-                const color = getWinTileColor(index);
-                const displayName = formatAppName(app.name);
-                const description = getAppDescription(app.name);
-                const sizeClass = showAll && index === 0 ? ' win-tile--wide' : ' win-tile--medium';
+                const showAll = !appFilterValue && filtered.length > 1;
+                grid.innerHTML = filtered.map((app, index) => {
+                    const color = getWinTileColor(index);
+                    const displayName = formatAppName(app.name);
+                    const description = getAppDescription(app.name);
+                    const sizeClass = showAll && index === 0 ? ' win-tile--wide' : ' win-tile--medium';
+                    const iconHtml = renderAppIcon(app);
 
-                return `
-                    <a href="${escapeHtml(app.url)}" target="_blank" rel="noopener noreferrer"
-                       class="win-tile${sizeClass}"
-                       style="background:${color}"
-                       title="${escapeHtml(description)}">
-                        <div class="win-tile-icon">${getAppSvg(app.name)}</div>
-                        <span class="win-tile-label">${escapeHtml(displayName)}</span>
-                    </a>
-                `;
+                    return `
+                        <a href="${escapeHtml(app.url)}" target="_blank" rel="noopener noreferrer"
+                           class="win-tile${sizeClass}"
+                           style="background:${color}"
+                           title="${escapeHtml(description)}">
+                            <div class="win-tile-icon">${iconHtml}</div>
+                            <span class="win-tile-label">${escapeHtml(displayName)}</span>
+                        </a>
+                    `;
             }).join('');
         }
 
