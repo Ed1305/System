@@ -1,6 +1,6 @@
 // api/apps/[id].js
 // Update and delete a single app (used by the admin "Your apps" editor).
-import sql from '../lib/db.js';
+import sql, { hasIconColumn } from '../lib/db.js';
 
 export default async function handler(req, res) {
     const id = Number(req.params.id);
@@ -13,14 +13,25 @@ export default async function handler(req, res) {
         if (!name || !url) {
             return res.status(400).json({ error: 'name and url are required' });
         }
-        const updated = await sql()`
-            update public.apps
-            set name = ${name},
-                url = ${url},
-                icon = ${icon ?? null}
-            where id = ${id}
-            returning id, name, url, platform, "addedAt", icon
-        `;
+        let updated;
+        if (await hasIconColumn()) {
+            updated = await sql()`
+                update public.apps
+                set name = ${name},
+                    url = ${url},
+                    icon = ${icon ?? null}
+                where id = ${id}
+                returning id, name, url, platform, "addedAt", icon
+            `;
+        } else {
+            updated = await sql()`
+                update public.apps
+                set name = ${name},
+                    url = ${url}
+                where id = ${id}
+                returning id, name, url, platform, "addedAt"
+            `;
+        }
         if (updated.length === 0) {
             return res.status(404).json({ error: 'App not found' });
         }
