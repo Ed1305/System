@@ -7,6 +7,7 @@
 import { neon } from '@neondatabase/serverless';
 
 let sqlClient = null;
+let iconColumnCache = null; // null = unknown, true/false = checked
 
 export default function sql() {
     if (!sqlClient) {
@@ -19,7 +20,11 @@ export default function sql() {
     return sqlClient;
 }
 
-let iconColumnCache = null; // null = unknown, true/false = checked
+// Tests swap in a fake tagged-template function here.
+export function setSqlClient(client) {
+    sqlClient = client;
+    iconColumnCache = null;
+}
 
 // True if the apps table has an `icon` column (older databases may not).
 // Cached after the first check so it costs nothing on later requests.
