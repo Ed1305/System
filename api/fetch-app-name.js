@@ -1,41 +1,21 @@
 // api/fetch-app-name.js
-// Fetches a web app's real name from its page (og:site_name / og:title /
-// <title>) so tiles can show the application name instead of the URL.
-export default async function handler(req, res) {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
-    }
+// Admin-only: reads a web app's real name from its page (og:site_name /
+// og:title / <title>) so tiles show the application name, not the URL.
+import { route, HttpError } from './lib/http.js';
+import { requireAdmin } from './lib/auth.js';
+import { httpUrl } from './lib/validate.js';
+import { fetchPublicHtml } from './lib/safe-fetch.js';
 
-    const { url } = req.body || {};
-    if (!url) {
-        return res.status(400).json({ error: 'Missing url' });
-    }
-
-    try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 8000);
-        const pageRes = await fetch(url, {
-            redirect: 'follow',
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36'
-            },
-            signal: controller.signal
-        });
-        clearTimeout(timeout);
-        if (!pageRes.ok) {
-            throw new Error('HTTP ' + pageRes.status);
-        }
-        const html = await pageRes.text();
+export default route({
+    async POST(req, res) {
+        requireAdmin(req);
+        const url = httpUrl((req.body || {}).url);
+        const html = await fetchPublicHtml(url);
         const name = extractTitle(html);
-        if (!name) {
-            throw new Error('No title found on page');
-        }
-        return res.status(200).json({ name });
-    } catch (err) {
-        console.error('fetch-app-name error:', err);
-        return res.status(500).json({ error: 'Could not fetch app name (' + err.message + ')' });
+        if (!name) throw new HttpError(422, 'No title found on that page');
+        return res.status(200).json({ name: name.slice(0, 100) });
     }
-}
+});
 
 // Extract the content attribute from a <meta> tag that contains `key`
 // (attribute order doesn't matter)
@@ -46,13 +26,21 @@ function metaContent(html, key) {
     return content ? content[1] : null;
 }
 
-function extractTitle(html) {
+function decodeEntities(s) {
+    return s
+        .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
+        .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
+        .replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'")
+        .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+}
+
+export function extractTitle(html) {
     const ogSite = metaContent(html, 'og:site_name');
     const ogTitle = metaContent(html, 'og:title');
     const titleTag = html.match(/<title[^>]*>([^<]*)<\/title>/i);
     for (const candidate of [ogSite, ogTitle, titleTag && titleTag[1]]) {
         if (candidate && candidate.trim()) {
-            return candidate.replace(/\s+/g, ' ').trim();
+            return decodeEntities(candidate).replace(/\s+/g, ' ').trim();
         }
     }
     return null;

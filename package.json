@@ -3,8 +3,15 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Alpha Konnect internal hub — static frontend + Vercel API layer backed by Neon Postgres",
+  "description": "Alpha Konnect internal hub \u2014 static frontend + Vercel API layer backed by Neon Postgres",
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "test:ui": "node tests/ui.e2e.js"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

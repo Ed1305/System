@@ -1,54 +1,52 @@
 // api/apps/[id].js
-// Update and delete a single app (used by the admin "Your apps" editor).
+// Update and delete a single app (admin "Your apps" editor).
 import sql, { hasIconColumn } from '../lib/db.js';
+import { route, HttpError } from '../lib/http.js';
+import { requireAdmin } from '../lib/auth.js';
+import { logActivity } from '../lib/activity.js';
+import { text, httpUrl, id as parseId } from '../lib/validate.js';
 
-export default async function handler(req, res) {
-    const id = Number(req.params.id);
-    if (!Number.isInteger(id) || id <= 0) {
-        return res.status(400).json({ error: 'Invalid id' });
-    }
+async function update(req, res) {
+    requireAdmin(req);
+    // Vercel puts dynamic route segments ([id]) on req.query, not req.params
+    const id = parseId(req.query.id);
+    const body = req.body || {};
+    const name = text(body.name, 'name', { max: 100, required: true });
+    const url = httpUrl(body.url);
+    const iconGiven = Object.prototype.hasOwnProperty.call(body, 'icon');
+    const icon = text(body.icon, 'icon', { max: 30 });
 
-    if (req.method === 'PATCH' || req.method === 'PUT') {
-        const { name, url, icon } = req.body || {};
-        if (!name || !url) {
-            return res.status(400).json({ error: 'name and url are required' });
-        }
-        let updated;
-        if (await hasIconColumn()) {
-            updated = await sql()`
-                update public.apps
-                set name = ${name},
-                    url = ${url},
-                    icon = ${icon ?? null}
-                where id = ${id}
-                returning id, name, url, platform, "addedAt", icon
-            `;
-        } else {
-            updated = await sql()`
-                update public.apps
-                set name = ${name},
-                    url = ${url}
-                where id = ${id}
-                returning id, name, url, platform, "addedAt"
-            `;
-        }
-        if (updated.length === 0) {
-            return res.status(404).json({ error: 'App not found' });
-        }
-        return res.status(200).json(updated[0]);
-    }
+    const updated = (iconGiven && await hasIconColumn())
+        ? await sql()`
+            update public.apps
+            set name = ${name}, url = ${url}, icon = ${icon}
+            where id = ${id}
+            returning id, name, url, platform, "addedAt", icon`
+        : await sql()`
+            update public.apps
+            set name = ${name}, url = ${url}
+            where id = ${id}
+            returning id, name, url, platform, "addedAt"`;
+    if (updated.length === 0) throw new HttpError(404, 'App not found');
 
-    if (req.method === 'DELETE') {
+    await logActivity('App updated', `"${name}" — ${url}`);
+    return res.status(200).json(updated[0]);
+}
+
+export default route({
+    PATCH: update,
+    PUT: update,
+
+    async DELETE(req, res) {
+        requireAdmin(req);
+        const id = parseId(req.query.id);
         const deleted = await sql()`
             delete from public.apps
             where id = ${id}
-            returning id
-        `;
-        if (deleted.length === 0) {
-            return res.status(404).json({ error: 'App not found' });
-        }
+            returning id, name`;
+        if (deleted.length === 0) throw new HttpError(404, 'App not found');
+
+        await logActivity('App removed', `"${deleted[0].name}"`);
         return res.status(200).json({ success: true });
     }
-
-    return res.status(405).json({ error: 'Method not allowed' });
-}
+});
